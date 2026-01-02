@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { User, Order, Product, Customer, UserRole, InventoryItem, Driver, Packer, AppNotification } from '../types';
+import { User, Order, Product, Customer, UserRole, InventoryItem, Driver, Packer, AppNotification, SupplierPriceRequest } from '../types';
 import { mockService } from '../services/mockDataService';
 import { AiOpportunityMatcher } from './AiOpportunityMatcher';
 import { Settings as SettingsComponent } from './Settings';
 import { triggerNativeSms, generateProductDeepLink } from '../services/smsService';
+import { WholesalerPriceRequestModal } from './WholesalerPriceRequestModal';
 import { 
   Package, Truck, MapPin, LayoutDashboard, 
   Users, Clock, CheckCircle, X, Mail, Smartphone, Building,
@@ -191,6 +192,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [pendingPriceRequests, setPendingPriceRequests] = useState<SupplierPriceRequest[]>([]);
+  const [selectedPriceRequest, setSelectedPriceRequest] = useState<SupplierPriceRequest | null>(null);
 
   const products = mockService.getAllProducts();
 
@@ -204,6 +207,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
     const allSellingOrders = mockService.getOrders(user.id).filter(o => o.sellerId === user.id);
     setOrders(allSellingOrders);
     setCustomers(mockService.getCustomers());
+    
+    // Load pending price requests for the wholesaler
+    const requests = mockService.getSupplierPriceRequests(user.id).filter(r => r.status === 'PENDING');
+    setPendingPriceRequests(requests);
   };
 
   const incomingQueue = orders.filter(o => o.status === 'Pending');
@@ -251,6 +258,36 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
             
             {/* LEFT SIDE: ORDER FULFILLMENT PIPELINE (8 Columns) */}
             <div className="xl:col-span-8 space-y-8 animate-in slide-in-from-left-4 duration-700">
+                
+                {/* URGENT PRICE AUDIT REQUESTS (Requested Enhancement) */}
+                {pendingPriceRequests.length > 0 && (
+                    <div className="bg-[#FFF1F2] border-4 border-red-500 rounded-[3rem] p-8 md:p-10 shadow-2xl relative overflow-hidden animate-in slide-in-from-top-10 duration-700">
+                        <div className="absolute top-0 right-0 p-8 opacity-5 transform rotate-12 scale-150"><Calculator size={200} /></div>
+                        <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-10">
+                            <div className="flex items-center gap-6">
+                                <div className="w-20 h-20 bg-red-500 rounded-[2rem] flex items-center justify-center text-white shadow-xl shadow-red-500/30 border-4 border-white animate-pulse">
+                                    <Calculator size={40} />
+                                </div>
+                                <div>
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <h2 className="text-2xl font-black text-red-900 uppercase tracking-tighter leading-none">Urgent Action Required</h2>
+                                        <span className="bg-red-900 text-white px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-[0.2em]">Live Lead</span>
+                                    </div>
+                                    <p className="text-red-700 text-sm font-bold leading-relaxed max-w-lg">
+                                        Platform Zero HQ has assigned <span className="font-black underline">{pendingPriceRequests.length} pending price audits</span> to your entity. Submit your best wholesale rates now to win these new buyers.
+                                    </p>
+                                </div>
+                            </div>
+                            <button 
+                                onClick={() => setSelectedPriceRequest(pendingPriceRequests[0])}
+                                className="w-full md:w-auto px-14 py-6 bg-red-600 hover:bg-black text-white rounded-3xl font-black uppercase tracking-[0.25em] text-xs shadow-2xl shadow-red-900/40 transition-all active:scale-95 flex items-center justify-center gap-3 group"
+                            >
+                                Open Price Audit <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+                            </button>
+                        </div>
+                    </div>
+                )}
+
                 <div className="bg-white rounded-[3.5rem] border border-gray-100 shadow-sm overflow-hidden flex flex-col min-h-[700px]">
                     <div className="p-10 border-b border-gray-100 bg-gray-50/50 flex flex-col md:flex-row justify-between items-center gap-8 shrink-0">
                         <div className="flex items-center gap-5">
@@ -419,6 +456,19 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
         customers={customers}
         onUpdate={loadData}
       />
+
+      {selectedPriceRequest && (
+        <WholesalerPriceRequestModal 
+            isOpen={!!selectedPriceRequest}
+            onClose={() => setSelectedPriceRequest(null)}
+            request={selectedPriceRequest}
+            onComplete={loadData}
+        />
+      )}
     </div>
   );
 };
+
+const ArrowLeft = ({ size = 24, ...props }: any) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+);

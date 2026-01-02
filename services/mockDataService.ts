@@ -359,6 +359,15 @@ class MockDataService {
   updateSupplierPriceRequest(id: string, req: SupplierPriceRequest) { const idx = this.supplierPriceRequests.findIndex(r => r.id === id); if (idx !== -1) this.supplierPriceRequests[idx] = req; }
   createSupplierPriceRequest(req: SupplierPriceRequest) { this.supplierPriceRequests.push(req); }
   
+  updateSupplierPriceRequestResponse(requestId: string, updatedItems: SupplierPriceRequestItem[]) {
+      const req = this.supplierPriceRequests.find(r => r.id === requestId);
+      if (req) {
+          req.items = updatedItems;
+          req.status = 'SUBMITTED';
+          this.addAppNotification('u1', 'Quote Received: Price Audit Complete', `Partner has responded to the quote request for ${req.customerContext}.`, 'PRICE_REQUEST');
+      }
+  }
+
   finalizeDeal(requestId: string): Customer | undefined {
     const req = this.supplierPriceRequests.find(r => r.id === requestId);
     if (req) {

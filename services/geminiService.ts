@@ -1,4 +1,3 @@
-
 import { GoogleGenAI, Type } from "@google/genai";
 // Moved ParsedOrderItem to types and imported here
 import { InventoryItem, Product, ProductUnit, ParsedOrderItem } from "../types";
@@ -16,6 +15,59 @@ export interface SeasonalProduct {
     variety: string;
     co2Savings: number;
 }
+
+export const calculateAcceptanceProbability = async (
+  productName: string,
+  invoicePrice: number,
+  targetPrice: number,
+  offeredPrice: number
+): Promise<{ probability: number; rationale: string }> => {
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    
+    try {
+        const response = await ai.models.generateContent({
+            model: 'gemini-3-flash-preview',
+            contents: `Analyze the following B2B produce quote scenario and return the probability (0-100) of the customer accepting this offer.
+            
+            Scenario:
+            - Product: "${productName}"
+            - Customer's current price (from invoice): $${invoicePrice.toFixed(2)}
+            - Platform Zero Target (Ideal savings): $${targetPrice.toFixed(2)}
+            - Wholesaler's Offered Price: $${offeredPrice.toFixed(2)}
+            
+            Guidelines:
+            - If offer <= target, probability is extremely high (95%+).
+            - If offer >= invoice, probability is extremely low (<5%).
+            - Customers value savings but also reliability.
+            
+            Return ONLY a JSON object:
+            {
+              "probability": (number),
+              "rationale": (string, max 15 words)
+            }`,
+            config: {
+                responseMimeType: "application/json",
+                responseSchema: {
+                    type: Type.OBJECT,
+                    properties: {
+                        probability: { type: Type.NUMBER },
+                        rationale: { type: Type.STRING }
+                    },
+                    required: ["probability", "rationale"]
+                }
+            }
+        });
+
+        const result = response.text;
+        if (result) {
+            return JSON.parse(result);
+        }
+        return { probability: 50, rationale: "Data unavailable." };
+    } catch (error) {
+        console.error("Gemini Probability Error:", error);
+        return { probability: 50, rationale: "AI Analysis offline." };
+    }
+};
 
 export const generateEnvironmentalImpact = async (name: string, variety: string): Promise<{co2: number, water: number, waste: number}> => {
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
