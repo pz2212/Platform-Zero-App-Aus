@@ -1,4 +1,3 @@
-
 import { 
   User, UserRole, Product, InventoryItem, Order, Customer, 
   SupplierPriceRequest, PricingRule,
@@ -103,19 +102,16 @@ class MockDataService {
 
   private generateDemoOrders() {
       const now = new Date();
-      // Outgoing Today
       this.orders.push({
           id: `o-today-1`, buyerId: 'u4', sellerId: 'u2', items: [{ productId: 'p1', quantityKg: 50, pricePerKg: 4.50 }], totalAmount: 225.00, status: 'Confirmed', date: now.toISOString(), paymentStatus: 'Unpaid', source: 'Direct'
       });
       this.orders.push({
           id: `o-today-2`, buyerId: 'u5', sellerId: 'u3', items: [{ productId: 'p5', quantityKg: 100, pricePerKg: 2.10 }], totalAmount: 210.00, status: 'Shipped', date: now.toISOString(), paymentStatus: 'Unpaid', logistics: { driverName: 'Dave Driver', deliveryTime: '2:30 PM' }, source: 'Marketplace'
       });
-      // Delivered recently (within countdown window)
       const oneHourAgo = new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString();
       this.orders.push({
           id: `o-delivered-1`, buyerId: 'c1', sellerId: 'u2', items: [{ productId: 'p4', quantityKg: 20, pricePerKg: 5.50 }], totalAmount: 110.00, status: 'Delivered', date: oneHourAgo, deliveredAt: oneHourAgo, paymentStatus: 'Unpaid', source: 'Direct'
       });
-      // Delivered earlier (still in 90m window)
       const eightyMinsAgo = new Date(Date.now() - 80 * 60 * 1000).toISOString();
       this.orders.push({
           id: `o-delivered-2`, buyerId: 'c2', sellerId: 'u3', items: [{ productId: 'p1', quantityKg: 40, pricePerKg: 4.50 }], totalAmount: 180.00, status: 'Delivered', date: eightyMinsAgo, deliveredAt: eightyMinsAgo, paymentStatus: 'Unpaid', source: 'Marketplace'
@@ -234,7 +230,6 @@ class MockDataService {
     }
   }
 
-  // Method to update PZ Markup
   updateCustomerMarkup(customerId: string, markup: number) {
       const customer = this.customers.find(c => c.id === customerId);
       if (customer) {
@@ -242,7 +237,6 @@ class MockDataService {
       }
   }
 
-  // Method to update Assigned Rep
   updateCustomerRep(customerId: string, repId: string) {
       const customer = this.customers.find(c => c.id === customerId);
       const rep = this.users.find(u => u.id === repId);
@@ -310,11 +304,47 @@ class MockDataService {
     return req;
   }
   deleteRegistrationRequest(id: string) { this.registrationRequests = this.registrationRequests.filter(r => r.id !== r.id); }
+  
   onboardNewBusiness(data: any): User {
-    const newUser: User = { id: `u-${Date.now()}`, name: data.name || 'New Lead', businessName: data.businessName, email: data.email, role: data.role || (data.type === 'Supplier' ? UserRole.WHOLESALER : UserRole.CONSUMER), industry: data.industry, phone: data.phone, businessProfile: { isComplete: false, abn: data.abn, businessLocation: data.address } as any };
+    const newUser: User = { id: data.id || `u-${Date.now()}`, name: data.name || 'New Lead', businessName: data.businessName, email: data.email, role: data.role || (data.type === 'Supplier' ? UserRole.WHOLESALER : UserRole.CONSUMER), industry: data.industry, phone: data.phone, businessProfile: { isComplete: false, abn: data.abn, businessLocation: data.address } as any };
     this.users.push(newUser);
     return newUser;
   }
+
+  // Final Profile submission from landing flow
+  submitFinalizedOnboarding(userId: string, profile: BusinessProfile) {
+    const user = this.users.find(u => u.id === userId);
+    if (user) {
+        user.businessProfile = { ...profile, isComplete: true };
+        
+        // 1. PZ admin receives high-priority notification in "New Leads" queue context
+        this.addAppNotification('u1', 'New Lead: Trade Profile Finalized', `${user.businessName} has completed their trade identity. Review ABN/Logistics.`, 'APPLICATION');
+        
+        // 2. Add as a pending customer lead for reps
+        this.customers.push({
+            id: user.id,
+            businessName: user.businessName,
+            contactName: user.name,
+            email: user.email,
+            phone: user.phone,
+            category: 'New Lead',
+            industry: user.industry,
+            connectionStatus: 'Pending Connection'
+        });
+
+        // 3. Simulated Email Connector
+        this.triggerEmailConnector(user.email, user.name);
+    }
+  }
+
+  private triggerEmailConnector(email: string, name: string) {
+    console.log(`%c[EMAIL CONNECTOR] Dispatching confirmation to ${email}...`, 'color: #10b981; font-weight: bold;');
+    // Simulate async email delivery
+    setTimeout(() => {
+        console.log(`%c[EMAIL DELIVERED] Message: "Hi ${name}, Platform Zero will be in contact within 1 business day."`, 'color: #3b82f6; font-style: italic;');
+    }, 1000);
+  }
+
   sendOnboardingComms(customerId: string) { }
   getRepCustomers(repId: string) { return this.customers.filter(c => c.assignedPzRepId === repId); }
   getRepIssues(repId: string) { return this.orders.filter(o => o.issue); }
@@ -356,9 +386,19 @@ class MockDataService {
   }
 
   getWholesalers() { return this.users.filter(u => u.role === UserRole.WHOLESALER || u.role === UserRole.FARMER); }
-  submitConsumerSignup(data: any) { const req: RegistrationRequest = { id: `reg-${Date.now()}`, businessName: data.businessName, name: data.name, email: data.email, requestedRole: data.requestedRole || UserRole.CONSUMER, industry: data.industry, status: 'Pending', submittedDate: new Date().toISOString(), consumerData: { location: data.location, weeklySpend: data.weeklySpend, orderFrequency: data.orderFrequency, invoiceFile: data.invoiceFile, mobile: data.mobile } }; this.registrationRequests.push(req); }
+  submitConsumerSignup(data: any) { 
+    const req: RegistrationRequest = { id: data.id || `reg-${Date.now()}`, businessName: data.businessName, name: data.name, email: data.email, requestedRole: data.requestedRole || UserRole.CONSUMER, industry: data.industry, status: 'Pending', submittedDate: new Date().toISOString(), consumerData: { location: data.location, weeklySpend: data.weeklySpend, orderFrequency: data.orderFrequency, invoiceFile: data.invoiceFile, mobile: data.mobile } }; 
+    this.registrationRequests.push(req); 
+    this.onboardNewBusiness(data); // Also create a user record for onboarding
+  }
   getProduct(id: string) { return this.products.find(p => p.id === id); }
-  updateBusinessProfile(userId: string, profile: BusinessProfile) { const user = this.users.find(u => u.id === userId); if (user) user.businessProfile = profile; }
+  updateBusinessProfile(userId: string, profile: BusinessProfile) { 
+    const user = this.users.find(u => u.id === userId); 
+    if (user) {
+        user.businessProfile = profile;
+        this.submitFinalizedOnboarding(userId, profile);
+    }
+  }
   getFormTemplate(role: UserRole): OnboardingFormTemplate | undefined {
     return {
       id: `form-${role}`,

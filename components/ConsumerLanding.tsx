@@ -4,19 +4,23 @@ import {
   TrendingUp, FileText, Loader2, MapPin, Mail, Phone, 
   Building, User, Clock, Star, X, Table, ArrowDown, Rocket, ClipboardList, ShieldCheck, CreditCard, Truck, Users, BookOpen, FilePlus, Sprout, Store, ShoppingCart, ChevronDown, UploadCloud, Leaf, TrendingDown, Sparkles
 } from 'lucide-react';
+// Fix line 10: Added INDUSTRIES to the import from mockDataService
 import { mockService, INDUSTRIES } from '../services/mockDataService';
 import { UserRole, Industry } from '../types';
 import { CompleteProfileModal } from './CompleteProfileModal';
 import { extractInvoiceItems, InvoiceItem } from '../services/geminiService';
 
 export const ConsumerLanding: React.FC<{ onLogin?: () => void }> = ({ onLogin }) => {
-  const [step, setStep] = useState<1 | 2 | 4>(1);
+  const [step, setStep] = useState<1 | 2 | 4 | 5>(1);
   const [file, setFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isSubmittingLead, setIsSubmittingLead] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   
+  // Internal tracking for the temporary lead user
+  const [tempUserId, setTempUserId] = useState<string | null>(null);
+
   // Analysis Data
   const [analysisItems, setAnalysisItems] = useState<InvoiceItem[]>([]);
   const [savingsMetrics, setSavingsMetrics] = useState({
@@ -58,8 +62,10 @@ export const ConsumerLanding: React.FC<{ onLogin?: () => void }> = ({ onLogin })
     setIsSubmittingLead(true);
     
     try {
+      const mockLeadId = `u-lead-${Date.now()}`;
+      setTempUserId(mockLeadId);
+
       if (formData.role === UserRole.CONSUMER && file) {
-        // Actual AI Analysis Flow for Buyers
         const reader = new FileReader();
         const base64Promise = new Promise<string>((resolve) => {
           reader.onload = (e) => resolve((e.target?.result as string).split(',')[1]);
@@ -75,22 +81,22 @@ export const ConsumerLanding: React.FC<{ onLogin?: () => void }> = ({ onLogin })
             weekly: weeklySavings,
             monthly: weeklySavings * 4.33,
             annual: weeklySavings * 52,
-            co2: weeklySavings * 1.4 // Mock 1.4kg CO2 saved per dollar optimized
+            co2: weeklySavings * 1.4
           });
 
-          // PERSIST LEAD TO DATABASE IMMEDIATELY
           mockService.submitConsumerSignup({
               ...formData,
+              id: mockLeadId,
               orderFrequency: formData.orderFreq,
               weeklySpend: parseFloat(formData.weeklySpend) || 0,
-              invoiceFile: `data:${file.type};base64,${base64}` // Store full base64 for admin
+              invoiceFile: `data:${file.type};base64,${base64}`
           });
 
-          setStep(2); // Move to analysis view
+          setStep(2);
         } else {
-          // If extraction fails, still create a lead for manual review
           mockService.submitConsumerSignup({
               ...formData,
+              id: mockLeadId,
               orderFrequency: formData.orderFreq,
               weeklySpend: parseFloat(formData.weeklySpend) || 0,
               invoiceFile: `data:${file.type};base64,${base64}`
@@ -98,17 +104,16 @@ export const ConsumerLanding: React.FC<{ onLogin?: () => void }> = ({ onLogin })
           setStep(4);
         }
       } else {
-        // Sign-up flow for non-buyers (Suppliers/Farmers)
         await new Promise(r => setTimeout(r, 1200));
         mockService.submitConsumerSignup({
             ...formData,
+            id: mockLeadId,
             requestedRole: formData.role
         });
         setStep(4);
       }
     } catch (err) {
       console.error("Analysis failed", err);
-      // Create lead anyway so admin sees it
       mockService.submitConsumerSignup({
           ...formData,
           orderFrequency: formData.orderFreq,
@@ -122,6 +127,11 @@ export const ConsumerLanding: React.FC<{ onLogin?: () => void }> = ({ onLogin })
 
   const handleOpenCalendly = () => {
     window.open(CALENDLY_LINK, '_blank');
+  };
+
+  const handleProfileComplete = () => {
+      // Transition to the final thank you page
+      setStep(5);
   };
 
   return (
@@ -370,47 +380,85 @@ export const ConsumerLanding: React.FC<{ onLogin?: () => void }> = ({ onLogin })
         )}
 
         {step === 4 && (
-          <div className="max-w-md mx-auto text-center space-y-8 animate-in zoom-in-95 duration-500">
+          <div className="max-w-md mx-auto text-center space-y-10 animate-in zoom-in-95 duration-500">
              <div>
                 <span className="bg-[#D1FAE5] text-[#065F46] px-4 py-1.5 rounded-full text-[11px] font-black uppercase tracking-widest shadow-sm">
-                    Application Received
+                    APPLICATION RECEIVED
                 </span>
-                <h2 className="text-4xl font-black text-[#0F172A] tracking-tight mt-6 mb-4 leading-none">What's next?</h2>
-                <p className="text-[#64748B] text-[15px] leading-relaxed font-medium">
+                <h2 className="text-[44px] font-black text-[#0F172A] tracking-tighter mt-8 mb-4 leading-none">What's next?</h2>
+                <p className="text-[#64748B] text-base leading-relaxed font-medium">
                     Your request has been placed in our <span className="text-[#0F172A] font-black">Pending Review</span> queue. You can continue setting up your profile now to speed up the approval process.
                 </p>
              </div>
 
              <div className="space-y-4">
-                <div onClick={() => setIsProfileModalOpen(true)} className="bg-white border-2 border-[#10B981] rounded-2xl p-6 text-left relative shadow-lg shadow-emerald-500/5 group cursor-pointer hover:scale-[1.02] transition-all">
-                    <div className="bg-[#10B981] text-white text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-bl-xl rounded-tr-xl absolute top-0 right-0">Fast Track</div>
-                    <div className="flex items-center gap-5">
-                        <div className="w-14 h-14 bg-[#ECFDF5] text-[#10B981] rounded-2xl flex items-center justify-center"><ClipboardList size={28} /></div>
+                <div onClick={() => setIsProfileModalOpen(true)} className="bg-white border-2 border-[#10B981] rounded-2xl p-7 text-left relative shadow-xl shadow-emerald-500/10 group cursor-pointer hover:scale-[1.02] transition-all">
+                    <div className="bg-[#10B981] text-white text-[9px] font-black uppercase tracking-[0.15em] px-4 py-1.5 rounded-bl-xl rounded-tr-xl absolute top-0 right-0 shadow-sm">FAST TRACK</div>
+                    <div className="flex items-center gap-6">
+                        <div className="w-16 h-16 bg-[#ECFDF5] text-[#10B981] rounded-2xl flex items-center justify-center shrink-0 shadow-inner-sm"><ClipboardList size={32} /></div>
                         <div className="flex-1">
-                            <h3 className="text-lg font-black text-[#0F172A]">Complete Profile</h3>
-                            <p className="text-sm text-[#64748B] font-medium leading-snug mt-0.5">Finalise your business and logistics details for the admin to review.</p>
-                            <button className="text-[#10B981] font-black text-sm uppercase tracking-widest mt-4 flex items-center gap-2 group-hover:gap-3 transition-all">Start Setup <ArrowRight size={16}/></button>
+                            <h3 className="text-xl font-black text-[#0F172A] uppercase tracking-tight">Complete Profile</h3>
+                            <p className="text-sm text-[#64748B] font-medium leading-snug mt-1.5">Finalise your business and logistics details for the admin to review.</p>
+                            <button className="text-[#10B981] font-black text-xs uppercase tracking-[0.2em] mt-5 flex items-center gap-2 group-hover:gap-3 transition-all">START SETUP <ArrowRight size={16}/></button>
                         </div>
                     </div>
                 </div>
 
-                <div onClick={handleOpenCalendly} className="bg-white border-2 border-gray-100 rounded-2xl p-6 text-left shadow-sm group cursor-pointer hover:border-blue-100 hover:scale-[1.02] transition-all">
-                    <div className="flex items-center gap-5">
-                        <div className="w-14 h-14 bg-[#EFF6FF] text-[#2563EB] rounded-2xl flex items-center justify-center"><Calendar size={28} /></div>
+                <div onClick={handleOpenCalendly} className="bg-white border-2 border-gray-100 rounded-2xl p-7 text-left shadow-sm group cursor-pointer hover:border-indigo-100 hover:scale-[1.02] transition-all">
+                    <div className="flex items-center gap-6">
+                        <div className="w-16 h-16 bg-[#EFF6FF] text-[#2563EB] rounded-2xl flex items-center justify-center shrink-0 shadow-inner-sm"><Calendar size={32} /></div>
                         <div className="flex-1">
-                            <h3 className="text-lg font-black text-[#0F172A]">Book a Demo</h3>
-                            <p className="text-sm text-[#64748B] font-medium leading-snug mt-0.5">Schedule a 15-min call with our specialist for a guided tour.</p>
-                            <button className="text-[#2563EB] font-black text-sm uppercase tracking-widest mt-4 flex items-center gap-2 group-hover:gap-3 transition-all">Select Time <ArrowRight size={16}/></button>
+                            <h3 className="text-xl font-black text-[#0F172A] uppercase tracking-tight">Book a Demo</h3>
+                            <p className="text-sm text-[#64748B] font-medium leading-snug mt-1.5">Schedule a 15-min call with our specialist for a guided tour.</p>
+                            <button className="text-[#2563EB] font-black text-xs uppercase tracking-[0.2em] mt-5 flex items-center gap-2 group-hover:gap-3 transition-all">SELECT TIME <ArrowRight size={16}/></button>
                         </div>
                     </div>
                 </div>
              </div>
 
-             <button onClick={() => setStep(1)} className="block mx-auto text-[#64748B] font-black text-xs uppercase tracking-widest hover:text-[#0F172A] transition-colors">Back to Start</button>
+             <button onClick={() => setStep(1)} className="block mx-auto text-[#64748B] font-black text-[10px] uppercase tracking-[0.3em] hover:text-[#0F172A] transition-colors pt-4">BACK TO START</button>
+          </div>
+        )}
+
+        {step === 5 && (
+          <div className="max-w-xl mx-auto text-center space-y-12 animate-in zoom-in-95 duration-500 py-12">
+             <div className="w-24 h-24 bg-emerald-100 rounded-full flex items-center justify-center mx-auto text-emerald-600 shadow-inner-sm border-2 border-emerald-200">
+                <CheckCircle size={48} />
+             </div>
+             <div>
+                <h2 className="text-4xl md:text-5xl font-black text-[#0F172A] tracking-tighter uppercase leading-none mb-6">Profile Submitted</h2>
+                <div className="bg-white p-8 rounded-[2rem] border-2 border-gray-100 shadow-sm">
+                    <p className="text-xl text-[#043003] font-black leading-relaxed">
+                        Thank you very much for completing profile we will be in contact within the next business day to start trade.
+                    </p>
+                </div>
+             </div>
+             
+             <div className="space-y-4">
+                 <div className="flex items-center justify-center gap-2 text-[#64748B] font-bold text-xs uppercase tracking-widest">
+                    <Clock size={16} /> Awaiting Verification
+                 </div>
+                 <button onClick={() => setStep(1)} className="px-10 py-5 bg-[#0F172A] text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.3em] shadow-xl hover:bg-black transition-all active:scale-95">Return to Marketplace</button>
+             </div>
           </div>
         )}
 
       </div>
+
+      <CompleteProfileModal 
+        isOpen={isProfileModalOpen} 
+        onClose={() => setIsProfileModalOpen(false)}
+        user={{
+            id: tempUserId || 'u-new-lead',
+            name: formData.name,
+            businessName: formData.businessName,
+            role: formData.role,
+            email: formData.email,
+            phone: formData.mobile,
+            industry: formData.industry
+        } as any}
+        onComplete={handleProfileComplete}
+      />
     </div>
   );
 };

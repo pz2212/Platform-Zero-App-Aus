@@ -1,10 +1,9 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { 
   X, Building2, ShieldAlert, CheckCircle2, Mail, Phone, MapPin, 
   ChevronRight, Landmark, Users2, PackageSearch, HelpCircle,
   TrendingUp, Sparkles, Sprout, ShoppingCart, CheckCircle, Truck, BookOpen,
-  /* Fix: Added missing Check import from lucide-react */
-  Check
+  Check, Loader2
 } from 'lucide-react';
 import { User, UserRole, BusinessProfile } from '../types';
 import { mockService } from '../services/mockDataService';
@@ -23,11 +22,21 @@ const TermsModal = ({ isOpen, onClose, onAccept }: { isOpen: boolean, onClose: (
   const handleScroll = () => {
     if (scrollRef.current) {
       const { scrollTop, scrollHeight, clientHeight } = scrollRef.current;
-      if (scrollHeight - scrollTop <= clientHeight + 5) {
+      // Precision fix: trigger when within 50px of the bottom to account for browser zoom/scaling
+      const isAtBottom = scrollHeight - scrollTop <= clientHeight + 50;
+      if (isAtBottom) {
         setHasScrolledToBottom(true);
       }
     }
   };
+
+  useEffect(() => {
+    if (isOpen) {
+      // Small delay to ensure layout is calculated before check
+      const timer = setTimeout(() => handleScroll(), 500);
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -36,10 +45,10 @@ const TermsModal = ({ isOpen, onClose, onAccept }: { isOpen: boolean, onClose: (
       <div className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[85vh] animate-in zoom-in-95 duration-200">
         <div className="p-8 border-b border-gray-100 flex justify-between items-center bg-white">
           <div>
-            <h2 className="text-2xl font-black text-[#0F172A] tracking-tight uppercase">Terms of Trade</h2>
-            <p className="text-xs text-gray-400 font-black uppercase tracking-widest mt-1">Platform Zero Solutions</p>
+            <h2 className="text-2xl font-black text-[#0F172A] tracking-tight uppercase leading-none">Terms of Trade</h2>
+            <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest mt-1">Platform Zero Solutions</p>
           </div>
-          <button onClick={onClose} className="text-gray-300 hover:text-gray-600 transition-colors p-1">
+          <button onClick={onClose} className="text-gray-300 hover:text-gray-900 transition-colors p-1">
             <X size={28} strokeWidth={2.5} />
           </button>
         </div>
@@ -49,13 +58,78 @@ const TermsModal = ({ isOpen, onClose, onAccept }: { isOpen: boolean, onClose: (
           onScroll={handleScroll}
           className="flex-1 overflow-y-auto p-10 space-y-6 text-sm text-gray-600 leading-relaxed custom-scrollbar bg-gray-50/30"
         >
-          <div className="space-y-6 bg-white p-8 rounded-3xl border border-gray-100 shadow-sm">
-            <h3 className="font-black text-gray-900 text-lg">Platform Zero Wholesaler Agreement</h3>
-            <div className="space-y-4">
-              <p><strong className="text-gray-900 font-black">1. Agency & Direct Trade</strong><br/>Wholesalers using the Platform Zero marketplace acknowledge that Platform Zero acts as a facilitator for trade between primary producers and end consumers. Direct circumvention of the platform for active PZ-introduced leads is prohibited.</p>
-              <p><strong className="text-gray-900 font-black">2. Payment & Settlement</strong><br/>Platform Zero facilitates payments via automated clearing. Bank details provided must match the registered ABN entity name. Payouts are processed on a T+7 basis unless otherwise agreed.</p>
-              <p><strong className="text-gray-900 font-black">3. Logistic Agency (Optional)</strong><br/>Wholesalers opting to become "Platform Zero Agents" agree to maintain a fleet capable of fulfilling PZ marketplace orders according to agreed service levels.</p>
+          <div className="space-y-8 bg-white p-8 md:p-10 rounded-3xl border border-gray-100 shadow-sm">
+            <div>
+              <h3 className="font-black text-gray-900 text-xl uppercase tracking-tight mb-4">Platform Zero Terms and Conditions</h3>
+              <p className="text-xs font-medium text-gray-500 mb-6">These Terms and Conditions govern the sale of fresh goods supplied by Platform Zero (“Platform Zero”) to the customer (“Customer”). By placing an order, the Customer agrees to be bound by these Terms.</p>
             </div>
+
+            <div className="space-y-6">
+              <section>
+                <h4 className="font-black text-gray-900 uppercase text-xs tracking-widest mb-2">1. Payment terms</h4>
+                <p className="mb-2"><strong className="text-gray-800 uppercase text-[10px]">Standard terms:</strong> Unless using Platform Zero’s American Express partnership, invoices must be paid within 7 days of the order date.</p>
+                <p><strong className="text-gray-800 uppercase text-[10px]">Extended terms via Amex:</strong> Customers seeking extended payment terms through our American Express partnership must complete onboarding and sign required documentation.</p>
+              </section>
+
+              <section>
+                <h4 className="font-black text-gray-900 uppercase text-xs tracking-widest mb-2">2. Late payments</h4>
+                <p>If there is an outstanding invoice, Platform Zero reserves the right to suspend fulfillment and take legal action. The Customer is liable for all collection costs, debt collector expenses, court costs, and solicitor fees.</p>
+              </section>
+
+              <section className="bg-red-50 p-4 rounded-2xl border border-red-100">
+                <h4 className="font-black text-red-900 uppercase text-xs tracking-widest mb-2">3. Reporting issues</h4>
+                <p className="mb-2 text-red-800">The Customer must notify Platform Zero within <strong className="font-black underline">one hour</strong> of receiving goods if there are any issues (missing, damaged, or quality concerns).</p>
+                <p className="text-red-800">To qualify for credit, photographic evidence must be provided through the portal. <strong className="font-black">Without photo evidence, no credit will be issued within 4 hours of receiving product.</strong></p>
+              </section>
+
+              <section>
+                <h4 className="font-black text-gray-900 uppercase text-xs tracking-widest mb-2">4. Credits and replacements</h4>
+                <p>Claims must be made within 4 hours of receipt. No credits issued after this period. Quality credits are subject to return of goods if requested.</p>
+              </section>
+
+              <section>
+                <h4 className="font-black text-gray-900 uppercase text-xs tracking-widest mb-2">5. Transport costs</h4>
+                <p>Transport is included in product prices for delivery locations within a 10km radius of the CBD.</p>
+              </section>
+
+              <section>
+                <h4 className="font-black text-gray-900 uppercase text-xs tracking-widest mb-2">6. Pricing</h4>
+                <p>Prices fluctuate with market conditions. If the market rate increases by more than 25% from a locked price, Platform Zero reserves the right to charge the current daily market rate.</p>
+              </section>
+
+              <section>
+                <h4 className="font-black text-gray-900 uppercase text-xs tracking-widest mb-2">7. Governing law</h4>
+                <p>Terms are governed by the laws of the jurisdiction in which Platform Zero operates.</p>
+              </section>
+
+              <section>
+                <h4 className="font-black text-gray-900 uppercase text-xs tracking-widest mb-2">8. Third-party processing</h4>
+                <p>Platform Zero uses accredited third-party SQF processors. The Customer must not purchase directly from the processor. Circumvention results in legal action for loss of income.</p>
+              </section>
+
+              <section className="bg-indigo-50 p-4 rounded-2xl border border-indigo-100">
+                <h4 className="font-black text-indigo-900 uppercase text-xs tracking-widest mb-2">9. Pre-orders</h4>
+                <p className="mb-2">Customers must provide <strong className="font-black">7 days’ notice</strong> if they do not intend to place their usual order. Failure to notify results in a charge equal to the average daily order value over the past three weeks.</p>
+              </section>
+
+              <section className="bg-[#0B1221] p-6 rounded-2xl text-white">
+                <h4 className="font-black text-emerald-400 uppercase text-xs tracking-widest mb-3 flex items-center gap-2">
+                    <ShieldAlert size={16}/> 10. NDA & IP Protection
+                </h4>
+                <p className="text-slate-300 text-xs leading-relaxed">
+                    The Customer acknowledges that <span className="text-white font-black">all design, intellectual property, marketplace software architecture, and business relationships</span> belong exclusively to Platform Zero Solutions. 
+                </p>
+                <p className="text-emerald-400 font-black text-xs mt-3 uppercase tracking-tight">
+                    NO COMPONENT OR RELATIONSHIP MAY BE COPIED OR CIRCUMVENTED BY MORE THAN 3% WITHOUT EXPRESS CONSENT.
+                </p>
+              </section>
+
+              <section>
+                <h4 className="font-black text-gray-900 uppercase text-xs tracking-widest mb-2">11. Acceptance</h4>
+                <p>By placing an order, you agree to these terms. No signature is required; terms are fully accepted upon the first order made.</p>
+              </section>
+            </div>
+
             <div className="pt-8 border-t border-gray-100 text-[10px] font-bold text-gray-400">
               ABN 53 667 679 003 • 10-20 Gwynne St, Cremorne, VIC 3121<br/>
               commercial@platformzerosolutions.com
@@ -65,15 +139,18 @@ const TermsModal = ({ isOpen, onClose, onAccept }: { isOpen: boolean, onClose: (
 
         <div className="p-8 bg-gray-50 border-t border-gray-100">
           {!hasScrolledToBottom ? (
-            <div className="flex items-center justify-center gap-3 text-gray-400 font-black text-xs uppercase tracking-widest animate-pulse">
-              Scroll to bottom to accept <ChevronRight size={16}/>
+            <div className="flex flex-col items-center gap-2">
+              <div className="flex items-center justify-center gap-3 text-gray-400 font-black text-xs uppercase tracking-widest animate-pulse">
+                Scroll to bottom to accept <ChevronRight size={16}/>
+              </div>
+              <p className="text-[9px] text-gray-300 font-bold uppercase">All 11 sections must be read to enable trade agreement</p>
             </div>
           ) : (
             <button 
               onClick={onAccept}
               className="w-full py-5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-black text-sm uppercase tracking-[0.2em] shadow-xl shadow-emerald-100 transition-all flex items-center justify-center gap-3 animate-in fade-in"
             >
-              <CheckCircle2 size={20}/> Accept Terms of Trade
+              <CheckCircle2 size={20}/> I Accept Terms & NDA
             </button>
           )}
         </div>
@@ -84,6 +161,7 @@ const TermsModal = ({ isOpen, onClose, onAccept }: { isOpen: boolean, onClose: (
 
 export const CompleteProfileModal: React.FC<CompleteProfileModalProps> = ({ isOpen, onClose, user, onComplete }) => {
   const [isTermsOpen, setIsTermsOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const [formData, setFormData] = useState({
     businessName: user.businessName || '',
@@ -94,20 +172,20 @@ export const CompleteProfileModal: React.FC<CompleteProfileModalProps> = ({ isOp
     bsb: user.businessProfile?.bsb || '',
     accountNumber: user.businessProfile?.accountNumber || '',
     // Director
-    directorName: user.businessProfile?.directorName || '',
-    directorEmail: user.businessProfile?.directorEmail || '',
-    directorPhone: user.businessProfile?.directorPhone || '',
+    directorName: user.directorName || user.name || '',
+    directorEmail: user.email || '',
+    directorPhone: user.phone || '',
     // Accounts
-    accountsName: user.businessProfile?.accountsName || '',
-    accountsEmail: user.businessProfile?.accountsEmail || '',
-    accountsPhone: user.businessProfile?.accountsPhone || '',
+    accountsName: '',
+    accountsEmail: '',
+    accountsPhone: '',
     // Trade Mix
-    productsSell: user.businessProfile?.productsSell || '',
-    productsGrow: user.businessProfile?.productsGrow || '',
-    productsBuy: user.businessProfile?.productsBuy || '',
+    productsSell: '',
+    productsGrow: '',
+    productsBuy: '',
     // Logistics
-    hasLogistics: user.businessProfile?.hasLogistics || false,
-    wantPzAgent: user.businessProfile?.isPzAgent || false,
+    hasLogistics: false,
+    wantPzAgent: false,
     acceptTerms: false
   });
 
@@ -124,13 +202,18 @@ export const CompleteProfileModal: React.FC<CompleteProfileModalProps> = ({ isOp
     setIsTermsOpen(false);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.acceptTerms) {
       alert("Please review and accept the Terms of Trade to proceed.");
       return;
     }
     
+    setIsSubmitting(true);
+    
+    // Simulate API delay
+    await new Promise(r => setTimeout(r, 1500));
+
     mockService.updateBusinessProfile(user.id, {
       ...formData,
       companyName: formData.businessName,
@@ -139,7 +222,7 @@ export const CompleteProfileModal: React.FC<CompleteProfileModalProps> = ({ isOp
       isComplete: true,
     } as any);
 
-    alert("Your onboarding profile has been submitted successfully!");
+    setIsSubmitting(false);
     onComplete();
     onClose();
   };
@@ -180,8 +263,8 @@ export const CompleteProfileModal: React.FC<CompleteProfileModalProps> = ({ isOp
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 bg-[#043003] rounded-2xl flex items-center justify-center text-white font-black text-2xl shadow-lg">P</div>
               <div>
-                <h2 className="text-2xl font-black text-[#0F172A] tracking-tight leading-none uppercase">Wholesaler Onboarding</h2>
-                <p className="text-[10px] font-black text-emerald-500 uppercase tracking-[0.2em] mt-1">Official Trade Registration • Australia</p>
+                <h2 className="text-2xl font-black text-[#0F172A] tracking-tight leading-none uppercase">Marketplace Registration</h2>
+                <p className="text-[10px] font-black text-emerald-500 uppercase tracking-[0.2em] mt-1">Official Trade Setup • B2B Protocol</p>
               </div>
             </div>
             <button onClick={onClose} className="text-gray-300 hover:text-gray-600 transition-colors p-2 bg-gray-50 rounded-full">
@@ -191,58 +274,54 @@ export const CompleteProfileModal: React.FC<CompleteProfileModalProps> = ({ isOp
 
           <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-10 pt-6 space-y-12 custom-scrollbar">
             
-            {/* SECTION 1: ENTITY */}
             <section className="animate-in slide-in-from-left-4">
-              <SectionHeader icon={Building2} title="Business Entity" sub="Trading Identity Information" />
+              <SectionHeader icon={Building2} title="Trade Entity" sub="Business Identification" />
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="md:col-span-2">
                   <FormInput label="Full Trading Name" name="businessName" placeholder="e.g. Fresh Wholesalers Pty Ltd" />
                 </div>
                 <FormInput label="ABN" name="abn" placeholder="53 667 679 003" />
-                <FormInput label="Principal Place of Business" name="address" placeholder="Store 12, Pooraka Produce Market" />
+                <FormInput label="Registered Business Address" name="address" placeholder="e.g. Unit 4, 12 Market St, Pooraka SA" />
               </div>
             </section>
 
-            {/* SECTION 2: BANKING */}
             <section className="bg-emerald-50/20 p-8 rounded-[2.5rem] border border-emerald-100/50 animate-in slide-in-from-left-4 duration-300">
-              <SectionHeader icon={Landmark} title="Banking Details" sub="For Automated Payout Settlement" />
+              <SectionHeader icon={Landmark} title="Settlement Details" sub="For automated marketplace clearing" />
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <FormInput label="Bank Name" name="bankName" placeholder="e.g. Commonwealth Bank" />
+                <FormInput label="Bank Institution" name="bankName" placeholder="e.g. CommBank" />
                 <FormInput label="BSB" name="bsb" placeholder="000-000" />
-                <FormInput label="Account Number" name="accountNumber" placeholder="12345678" />
+                <FormInput label="Account No." name="accountNumber" placeholder="12345678" />
               </div>
             </section>
 
-            {/* SECTION 3: KEY CONTACTS */}
             <section className="animate-in slide-in-from-left-4 duration-500">
-              <SectionHeader icon={Users2} title="Key Stakeholders" sub="Operational Decision Makers" />
+              <SectionHeader icon={Users2} title="Decision Makers" sub="Director & Accounts Contacts" />
               <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                 <div className="space-y-4">
                   <div className="flex items-center gap-2 text-indigo-600 font-black text-[10px] uppercase tracking-widest border-b border-indigo-50 pb-2 mb-4">
-                    <CheckCircle size={14}/> Primary Director
+                    <CheckCircle size={14}/> Managing Director
                   </div>
-                  <FormInput label="Director Name" name="directorName" placeholder="Full Name" />
-                  <FormInput label="Director Email" name="directorEmail" type="email" placeholder="email@business.com" />
-                  <FormInput label="Director Phone" name="directorPhone" placeholder="Mobile preferred" />
+                  <FormInput label="Full Name" name="directorName" />
+                  <FormInput label="Business Email" name="directorEmail" type="email" />
+                  <FormInput label="Direct Mobile" name="directorPhone" />
                 </div>
                 <div className="space-y-4">
                   <div className="flex items-center gap-2 text-indigo-600 font-black text-[10px] uppercase tracking-widest border-b border-indigo-50 pb-2 mb-4">
-                    <CheckCircle size={14}/> Accounts / AP
+                    <CheckCircle size={14}/> Accounts Payable
                   </div>
-                  <FormInput label="Accounts Contact" name="accountsName" placeholder="Accounts Manager" />
-                  <FormInput label="Accounts Email" name="accountsEmail" type="email" placeholder="accounts@business.com" />
-                  <FormInput label="Accounts Phone" name="accountsPhone" placeholder="Direct Line" />
+                  <FormInput label="Contact Name" name="accountsName" />
+                  <FormInput label="AP Email" name="accountsEmail" type="email" />
+                  <FormInput label="AP Phone" name="accountsPhone" />
                 </div>
               </div>
             </section>
 
-            {/* SECTION 4: PRODUCT CATEGORIES */}
             <section className="animate-in slide-in-from-left-4 duration-700">
-              <SectionHeader icon={PackageSearch} title="Produce Inventory" sub="Market Catalog Categorization" />
+              <SectionHeader icon={PackageSearch} title="Produce Capability" sub="Defining your market mix" />
               <div className="space-y-6">
                 <div>
                   <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1 flex items-center gap-2">
-                    <TrendingUp size={14} className="text-emerald-500"/> Products You Sell (Active Inventory)
+                    <TrendingUp size={14} className="text-emerald-500"/> Core Inventory Varieties
                   </label>
                   <textarea 
                     name="productsSell" 
@@ -252,93 +331,13 @@ export const CompleteProfileModal: React.FC<CompleteProfileModalProps> = ({ isOp
                     onChange={handleInputChange} 
                   />
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1 flex items-center gap-2">
-                      <Sprout size={14} className="text-indigo-500"/> Products You Grow
-                    </label>
-                    <textarea 
-                      name="productsGrow" 
-                      placeholder="e.g. Seasonal stone fruits, leafy greens..." 
-                      className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl text-sm font-bold text-gray-900 h-24 resize-none outline-none focus:bg-white focus:ring-4 focus:ring-emerald-500/5 transition-all" 
-                      value={formData.productsGrow} 
-                      onChange={handleInputChange} 
-                    />
-                  </div>
-                  <div>
-                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1 flex items-center gap-2">
-                      <ShoppingCart size={14} className="text-indigo-500"/> Products You Buy (Sourcing Needs)
-                    </label>
-                    <textarea 
-                      name="productsBuy" 
-                      placeholder="e.g. Specialty herbs, organic root veg..." 
-                      className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl text-sm font-bold text-gray-900 h-24 resize-none outline-none focus:bg-white focus:ring-4 focus:ring-emerald-500/5 transition-all" 
-                      value={formData.productsBuy} 
-                      onChange={handleInputChange} 
-                    />
-                  </div>
-                </div>
               </div>
             </section>
 
-            {/* SECTION 5: LOGISTICS & AGENT STATUS */}
-            <section className="bg-indigo-50/40 p-8 rounded-[2.5rem] border border-indigo-100/50 space-y-6">
-              <SectionHeader icon={Truck} title="Delivery Logistics" sub="Fulfillment Capabilities" />
-              
-              <div className="flex items-center justify-between p-6 bg-white rounded-2xl border border-indigo-100 shadow-sm">
-                <div className="flex items-center gap-4">
-                   <div className={`p-4 rounded-2xl transition-all shadow-md ${formData.hasLogistics ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-400'}`}>
-                      <Truck size={28}/>
-                   </div>
-                   <div>
-                      <p className="font-black text-gray-900 uppercase text-sm tracking-tight leading-none">Fleet Operations</p>
-                      <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mt-1.5">Do you operate your own distribution fleet?</p>
-                   </div>
-                </div>
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input type="checkbox" name="hasLogistics" className="sr-only peer" checked={formData.hasLogistics} onChange={handleInputChange}/>
-                  <div className="w-16 h-9 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-7 after:w-7 after:transition-all peer-checked:bg-indigo-600 shadow-inner"></div>
-                </label>
-              </div>
-
-              {formData.hasLogistics && (
-                <div className="p-8 bg-emerald-600 rounded-[2rem] text-white shadow-2xl animate-in zoom-in-95 duration-300 relative overflow-hidden group border-2 border-emerald-400/30">
-                  <div className="absolute top-0 right-0 p-10 opacity-10 transform translate-x-1/4 -translate-y-1/4">
-                    <Sparkles size={180}/>
-                  </div>
-                  <div className="relative z-10">
-                    <div className="flex items-start gap-5 mb-8">
-                      <div className="bg-white/20 p-3 rounded-2xl shadow-lg border border-white/20">
-                        <CheckCircle2 size={32}/>
-                      </div>
-                      <div>
-                        <h4 className="font-black uppercase tracking-[0.2em] text-lg leading-none mb-2">Platform Zero Agent Program</h4>
-                        <p className="text-xs text-emerald-50 font-medium leading-relaxed max-w-md">
-                          As an Agent, we send you pre-paid marketplace orders for delivery within your operational region. 
-                          <span className="font-black text-white ml-1">Receive new customers automatically and earn freight margin.</span>
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between bg-white/10 p-4 rounded-2xl border border-white/10 backdrop-blur-sm">
-                       <span className="text-[10px] font-black uppercase tracking-[0.3em] text-emerald-200">Opt-in to Agency Status?</span>
-                       <button 
-                          type="button"
-                          onClick={() => setFormData(prev => ({...prev, wantPzAgent: !prev.wantPzAgent}))}
-                          className={`px-8 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${formData.wantPzAgent ? 'bg-white text-emerald-700 shadow-xl' : 'bg-emerald-700/50 text-emerald-300 border border-white/20'}`}
-                       >
-                          {formData.wantPzAgent ? 'AGENT STATUS ACTIVE' : 'REQUEST AGENT STATUS'}
-                       </button>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </section>
-
-            {/* SECTION 6: COMPLIANCE */}
             <section className="space-y-4 pt-4 border-t border-gray-100">
               <div className="flex items-center gap-2 text-[#10B981] mb-6">
                 <ShieldAlert size={18} strokeWidth={2.5}/>
-                <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-gray-900">Compliance & Agreement</h3>
+                <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-gray-900">Legal Agreement</h3>
               </div>
               
               <div 
@@ -346,14 +345,13 @@ export const CompleteProfileModal: React.FC<CompleteProfileModalProps> = ({ isOp
                 className={`flex items-center gap-5 p-6 border-2 rounded-[2rem] transition-all shadow-sm cursor-pointer ${formData.acceptTerms ? 'bg-emerald-50 border-emerald-200' : 'bg-gray-50 border-gray-100 hover:border-emerald-300 group'}`}
               >
                 <div className={`w-10 h-10 rounded-full border-4 flex items-center justify-center transition-all ${formData.acceptTerms ? 'bg-emerald-500 border-emerald-200 text-white' : 'bg-white border-gray-200 text-transparent group-hover:border-emerald-200'}`}>
-                  {/* Fix: Added missing Check component call */}
                   <Check size={24} strokeWidth={4}/>
                 </div>
                 <div className="flex-1">
-                  <p className="text-base text-gray-900 font-black tracking-tight leading-none mb-1.5">Official Terms of Trade</p>
-                  <p className="text-xs text-gray-400 font-medium">I confirm that I am an authorized representative of the business entity.</p>
+                  <p className="text-base text-gray-900 font-black tracking-tight leading-none mb-1.5">Market Terms & NDA</p>
+                  <p className="text-xs text-gray-400 font-medium">I verify that I am authorized to bind this business entity.</p>
                 </div>
-                {!formData.acceptTerms && <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest group-hover:underline">Review & Accept</span>}
+                {!formData.acceptTerms && <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest group-hover:underline">Scroll to Accept</span>}
               </div>
 
               <div className="flex justify-between items-center px-4 mt-4">
@@ -362,33 +360,33 @@ export const CompleteProfileModal: React.FC<CompleteProfileModalProps> = ({ isOp
                   onClick={() => setIsTermsOpen(true)}
                   className="text-gray-400 font-bold text-[10px] uppercase tracking-widest flex items-center gap-2 hover:text-indigo-600 transition-colors"
                 >
-                  <BookOpen size={14}/> Wholesaler Agreement PDF
+                  <BookOpen size={14}/> View Full Agreement PDF
                 </button>
                 <div className="flex items-center gap-2">
                    <span className={`w-2 h-2 rounded-full ${formData.acceptTerms ? 'bg-emerald-500' : 'bg-orange-500 animate-pulse'}`}></span>
                    <span className={`font-black text-[10px] uppercase tracking-widest ${formData.acceptTerms ? 'text-emerald-600' : 'text-orange-500'}`}>
-                     {formData.acceptTerms ? 'Terms Accepted' : 'Awaiting Acceptance'}
+                     {formData.acceptTerms ? 'Terms Accepted' : 'Awaiting Scroll'}
                    </span>
                 </div>
               </div>
             </section>
           </form>
 
-          {/* Footer Actions */}
           <div className="p-8 border-t border-gray-100 bg-white sticky bottom-0 z-10 flex gap-4">
             <button 
               type="button"
               onClick={onClose}
               className="flex-1 py-5 bg-gray-50 text-gray-400 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-gray-100 transition-all active:scale-95"
             >
-              Close
+              Cancel
             </button>
             <button 
               onClick={handleSubmit}
-              disabled={!formData.acceptTerms}
+              disabled={!formData.acceptTerms || isSubmitting}
               className="flex-[2] py-5 bg-[#043003] hover:bg-black disabled:bg-gray-100 disabled:text-gray-300 disabled:cursor-not-allowed text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-2xl transition-all active:scale-[0.98] flex items-center justify-center gap-3"
             >
-              Submit Onboarding Profile <ChevronRight size={18}/>
+              {/* Added missing Loader2 import and used here */}
+              {isSubmitting ? <Loader2 className="animate-spin" size={20}/> : <><CheckCircle size={20}/> Finalize Trade Identity</>}
             </button>
           </div>
         </div>
