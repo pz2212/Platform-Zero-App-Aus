@@ -1,3 +1,4 @@
+
 import { 
   User, UserRole, Product, InventoryItem, Order, Customer, 
   SupplierPriceRequest, PricingRule,
@@ -61,21 +62,19 @@ class MockDataService {
   };
 
   private products: Product[] = [
-    { id: 'p1', name: 'Organic Roma Tomatoes', category: 'Vegetable', variety: 'Roma', imageUrl: 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?auto=format&fit=crop&q=80&w=400&h=400', defaultPricePerKg: 4.50, co2SavingsPerKg: 1.2 },
-    { id: 'p1-truss', name: 'Truss Vine Tomatoes', category: 'Vegetable', variety: 'Vine-Ripened', imageUrl: 'https://images.unsplash.com/photo-1582284540020-8acbe03f4924?auto=format&fit=crop&q=80&w=400&h=400', defaultPricePerKg: 6.20, co2SavingsPerKg: 1.0 },
-    { id: 'p2', name: 'Fresh Lettuce', category: 'Vegetable', variety: 'Cos', imageUrl: 'https://images.unsplash.com/photo-1518977676601-b53f82aba655?auto=format&fit=crop&q=80&w=400&h=400', defaultPricePerKg: 1.20, co2SavingsPerKg: 0.8 },
+    { id: 'p1', name: 'Roma Tomatoes', category: 'Vegetable', variety: 'Truss', imageUrl: 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?auto=format&fit=crop&q=80&w=400&h=400', defaultPricePerKg: 4.50, co2SavingsPerKg: 1.2 },
+    { id: 'p2', name: 'Iceberg Lettuce', category: 'Vegetable', variety: 'Crisp', imageUrl: 'https://images.unsplash.com/photo-1518977676601-b53f82aba655?auto=format&fit=crop&q=80&w=400&h=400', defaultPricePerKg: 1.20, co2SavingsPerKg: 0.8 },
     { id: 'p3', name: 'Apples', category: 'Fruit', variety: 'Pink Lady', imageUrl: 'https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?auto=format&fit=crop&q=80&w=400&h=400', defaultPricePerKg: 3.80, co2SavingsPerKg: 1.5 },
-    { id: 'p4', name: 'Eggplants', category: 'Vegetable', variety: 'Black Beauty', imageUrl: 'https://images.unsplash.com/photo-1615484477778-ca3b77940c25?auto=format&fit=crop&q=80&w=400&h=400', defaultPricePerKg: 5.50, co2SavingsPerKg: 1.1 },
+    { id: 'p4', name: 'Black Eggplant', category: 'Vegetable', variety: 'Standard', imageUrl: 'https://images.unsplash.com/photo-1615484477778-ca3b77940c25?auto=format&fit=crop&q=80&w=400&h=400', defaultPricePerKg: 5.50, co2SavingsPerKg: 1.1 },
     { id: 'p5', name: 'Dutch Cream Potatoes', category: 'Vegetable', variety: 'Grade A', imageUrl: 'https://images.unsplash.com/photo-1518977676601-b53f82aba655?auto=format&fit=crop&q=80&w=400&h=400', defaultPricePerKg: 2.10, co2SavingsPerKg: 0.9 },
     { id: 'p-banana-cav', name: 'Cavendish Bananas', category: 'Fruit', variety: 'Cavendish', imageUrl: 'https://images.unsplash.com/photo-1571771894821-ad9902537317?auto=format&fit=crop&q=80&w=400&h=400', defaultPricePerKg: 3.50, co2SavingsPerKg: 0.9 },
     { id: 'p-banana-lady', name: 'Lady Finger Bananas', category: 'Fruit', variety: 'Lady Finger', imageUrl: 'https://images.unsplash.com/photo-1603833665858-e61d17a86224?auto=format&fit=crop&q=80&w=400&h=400', defaultPricePerKg: 5.80, co2SavingsPerKg: 0.7 },
   ];
 
   private inventory: InventoryItem[] = [
-    { id: 'i1', lotNumber: 'PZ-LOT-1001', productId: 'p1', ownerId: 'u3', quantityKg: 500, expiryDate: new Date(Date.now() + 86400000 * 5).toISOString(), harvestDate: new Date().toISOString(), uploadedAt: new Date(Date.now() - 86400000 * 10).toISOString(), status: 'Available', originalFarmerName: 'Green Valley Farms', harvestLocation: 'Yarra Valley', warehouseLocation: 'Zone A-4', discountAfterDays: 3, discountPricePerKg: 3.00, logisticsPrice: 15.00 },
-    { id: 'i2', lotNumber: 'PZ-LOT-1002', productId: 'p2', ownerId: 'u2', quantityKg: 1000, expiryDate: new Date(Date.now() + 86400000 * 14).toISOString(), harvestDate: new Date().toISOString(), uploadedAt: new Date(Date.now() - 86400000).toISOString(), status: 'Available', originalFarmerName: 'Bob\'s Spuds', harvestLocation: 'Gippsland', warehouseLocation: 'Cold Room 1', logisticsPrice: 20.00 },
-    { id: 'i3', lotNumber: 'PZ-LOT-1003', productId: 'p4', ownerId: 'u2', quantityKg: 200, expiryDate: new Date(Date.now() + 86400000 * 3).toISOString(), harvestDate: new Date().toISOString(), uploadedAt: new Date().toISOString(), status: 'Available', originalFarmerName: 'Green Valley Farms', harvestLocation: 'Yarra Valley', warehouseLocation: 'Zone C-2', logisticsPrice: 12.50 },
-    { id: 'i4', lotNumber: 'PZ-LOT-1004', productId: 'p5', ownerId: 'u3', quantityKg: 800, expiryDate: new Date(Date.now() + 86400000 * 10).toISOString(), harvestDate: new Date().toISOString(), uploadedAt: new Date().toISOString(), status: 'Available', originalFarmerName: 'Bob\'s Spuds', harvestLocation: 'Gippsland', warehouseLocation: 'Zone D-1', logisticsPrice: 18.00 },
+    { id: 'i1', lotNumber: 'PZ-LOT-1001', productId: 'p1', ownerId: 'u2', quantityKg: 30, expiryDate: new Date(Date.now() + 86400000 * 5).toISOString(), harvestDate: new Date().toISOString(), uploadedAt: new Date().toISOString(), status: 'Available', originalFarmerName: 'Green Valley Farms', harvestLocation: 'Yarra Valley', warehouseLocation: 'Zone A-4', discountAfterDays: 3, discountPricePerKg: 3.00, logisticsPrice: 15.00 },
+    { id: 'i2', lotNumber: 'PZ-LOT-1002', productId: 'p2', ownerId: 'u2', quantityKg: 80, expiryDate: new Date(Date.now() + 86400000 * 14).toISOString(), harvestDate: new Date().toISOString(), uploadedAt: new Date().toISOString(), status: 'Available', originalFarmerName: 'Bob\'s Spuds', harvestLocation: 'Gippsland', warehouseLocation: 'Cold Room 1', logisticsPrice: 20.00 },
+    { id: 'i3', lotNumber: 'PZ-LOT-1003', productId: 'p4', ownerId: 'u2', quantityKg: 0, expiryDate: new Date(Date.now() + 86400000 * 3).toISOString(), harvestDate: new Date().toISOString(), uploadedAt: new Date().toISOString(), status: 'Available', originalFarmerName: 'Green Valley Farms', harvestLocation: 'Yarra Valley', warehouseLocation: 'Zone C-2', logisticsPrice: 12.50 },
   ];
 
   private orders: Order[] = [];
@@ -84,15 +83,24 @@ class MockDataService {
   private customers: Customer[] = [
     { id: 'u4', businessName: 'The Morning Cafe', contactName: 'Alice Consumer', category: 'Restaurant', industry: 'Cafe', commonProducts: 'Bananas, Potatoes, Lettuce', location: 'Richmond', connectedSupplierId: 'u2', connectedSupplierName: 'Fresh Wholesalers', connectionStatus: 'Active', email: 'alice@cafe.com', phone: '0412 345 678', pzMarkup: 15, assignedPzRepId: 'rep1', assignedPzRepName: 'Alex Johnson' },
     { id: 'u5', businessName: 'Local Corner Grocers', contactName: 'Gary Grocer', category: 'Grocery', industry: 'Grocery Store', commonProducts: 'Everything', location: 'Fitzroy', connectedSupplierId: 'u2', connectedSupplierName: 'Fresh Wholesalers', connectionStatus: 'Active', email: 'gary@grocer.com', phone: '0411 222 333', pzMarkup: 12, assignedPzRepId: 'rep2', assignedPzRepName: 'Sam Taylor' },
-    { id: 'c1', businessName: 'Fresh Market Co', contactName: 'Sarah Johnson', category: 'Retail', industry: 'Grocery Store', commonProducts: 'Tomatoes, Lettuce, Apples', location: 'Richmond', connectedSupplierId: 'u2', connectedSupplierName: 'Fresh Wholesalers', connectionStatus: 'Active', email: 'sarah@freshmarket.com', phone: '0400 999 888', pzMarkup: 15, assignedPzRepId: 'rep1', assignedPzRepName: 'Alex Johnson' },
-    { id: 'c2', businessName: 'Healthy Eats', contactName: 'Chef Mario', category: 'Restaurant', industry: 'Restaurant', commonProducts: 'Tomatoes, Eggplant, Broccoli', location: 'South Yarra', connectedSupplierId: 'u3', connectedSupplierName: 'Green Valley Farms', connectionStatus: 'Active', email: 'mario@healthy.com', phone: '0455 111 222', pzMarkup: 18, assignedPzRepId: 'rep1', assignedPzRepName: 'Alex Johnson' },
-    { id: 'c3', businessName: 'Richmond Corner Pub', contactName: 'Dave Smith', category: 'Pub/Bar', industry: 'Pub', location: 'Richmond', connectedSupplierId: 'u2', connectionStatus: 'Pricing Pending', email: 'dave@richmondpub.com', phone: '0488 777 666', pzMarkup: 15, assignedPzRepId: 'rep2', assignedPzRepName: 'Sam Taylor' },
   ];
 
   private drivers: Driver[] = [];
   private packers: Packer[] = [];
   private registrationRequests: RegistrationRequest[] = [];
-  private supplierPriceRequests: SupplierPriceRequest[] = [];
+  private supplierPriceRequests: SupplierPriceRequest[] = [
+    {
+      id: 'pr-demo-1',
+      supplierId: 'u2',
+      status: 'PENDING',
+      createdAt: new Date().toISOString(),
+      customerContext: 'New Bistro Client',
+      customerLocation: 'Richmond, VIC',
+      items: [
+        { productId: 'p1', productName: 'Roma Tomatoes', qty: 100, invoicePrice: 5.50, targetPrice: 4.00 }
+      ]
+    }
+  ];
   private chatMessages: ChatMessage[] = [];
 
   constructor() {
@@ -102,20 +110,24 @@ class MockDataService {
 
   private generateDemoOrders() {
       const now = new Date();
+      // Match screenshot: Local Corner Grocers - $185.00
       this.orders.push({
-          id: `o-today-1`, buyerId: 'u4', sellerId: 'u2', items: [{ productId: 'p1', quantityKg: 50, pricePerKg: 4.50 }], totalAmount: 225.00, status: 'Confirmed', date: now.toISOString(), paymentStatus: 'Unpaid', source: 'Direct'
+          id: `o-today-1`, buyerId: 'u5', sellerId: 'u2', items: [
+            { productId: 'p1', quantityKg: 20, pricePerKg: 4.50 },
+            { productId: 'p2', quantityKg: 50, pricePerKg: 1.20 },
+            { productId: 'p4', quantityKg: 6, pricePerKg: 5.50 }
+          ], totalAmount: 185.00, status: 'Confirmed', date: now.toISOString(), paymentStatus: 'Unpaid', source: 'Direct'
       });
+      // Demand for Demand Matrix:
+      // Tomatoes: 20kg + 30kg = 50kg (Screenshot shows 50kg demand)
+      // Lettuce: 50kg = 50kg (Screenshot shows 50kg demand)
+      // Eggplant: 10kg = 10kg (Screenshot shows 10kg demand)
       this.orders.push({
-          id: `o-today-2`, buyerId: 'u5', sellerId: 'u3', items: [{ productId: 'p5', quantityKg: 100, pricePerKg: 2.10 }], totalAmount: 210.00, status: 'Shipped', date: now.toISOString(), paymentStatus: 'Unpaid', logistics: { driverName: 'Dave Driver', deliveryTime: '2:30 PM' }, source: 'Marketplace'
-      });
-      const oneHourAgo = new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString();
-      this.orders.push({
-          id: `o-delivered-1`, buyerId: 'c1', sellerId: 'u2', items: [{ productId: 'p4', quantityKg: 20, pricePerKg: 5.50 }], totalAmount: 110.00, status: 'Delivered', date: oneHourAgo, deliveredAt: oneHourAgo, paymentStatus: 'Unpaid', source: 'Direct'
-      });
-      const eightyMinsAgo = new Date(Date.now() - 80 * 60 * 1000).toISOString();
-      this.orders.push({
-          id: `o-delivered-2`, buyerId: 'c2', sellerId: 'u3', items: [{ productId: 'p1', quantityKg: 40, pricePerKg: 4.50 }], totalAmount: 180.00, status: 'Delivered', date: eightyMinsAgo, deliveredAt: eightyMinsAgo, paymentStatus: 'Unpaid', source: 'Marketplace'
-      });
+        id: `o-demand-1`, buyerId: 'u4', sellerId: 'u2', items: [
+          { productId: 'p1', quantityKg: 30, pricePerKg: 4.50 },
+          { productId: 'p4', quantityKg: 4, pricePerKg: 5.50 }
+        ], totalAmount: 325.00, status: 'Pending', date: now.toISOString(), paymentStatus: 'Unpaid', source: 'Direct'
+    });
   }
 
   private generateDemoIssues() {
@@ -128,18 +140,6 @@ class MockDataService {
           reportedAt: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
           supplierStatus: 'PENDING',
           repStatus: 'UNSEEN',
-          assignedRepId: 'rep1'
-      });
-      this.issues.push({
-          id: 'iss-2',
-          orderId: 'o-delivered-2',
-          productId: 'p1',
-          type: 'Short Pick',
-          description: 'Invoice says 40kg, but we only counted 35kg in the crates.',
-          reportedAt: new Date(Date.now() - 15 * 60 * 1000).toISOString(),
-          supplierStatus: 'ACCEPTED',
-          supplierAction: 'CREDIT',
-          repStatus: 'ACTIONING',
           assignedRepId: 'rep1'
       });
   }
@@ -187,7 +187,17 @@ class MockDataService {
   }
 
   createInstantOrder(buyerId: string, item: InventoryItem, quantity: number, price: number) {
-    const newOrder: Order = { id: `o-inst-${Date.now()}`, buyerId, sellerId: item.ownerId, items: [{ productId: item.productId, quantityKg: quantity, pricePerKg: price }], totalAmount: quantity * price, status: 'Confirmed', date: new Date().toISOString(), paymentStatus: 'Unpaid', source: 'Marketplace' };
+    const newOrder: Order = { 
+        id: `o-inst-${Date.now()}`, 
+        buyerId, 
+        sellerId: item.ownerId, 
+        items: [{ productId: item.productId, quantityKg: quantity, pricePerKg: price }], 
+        totalAmount: quantity * price, 
+        status: 'Confirmed', 
+        date: new Date().toISOString(), 
+        paymentStatus: 'Unpaid', 
+        source: 'Marketplace' 
+    };
     this.orders.push(newOrder);
     return newOrder;
   }

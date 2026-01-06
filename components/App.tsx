@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { HashRouter as Router, Routes, Route, Link, useLocation, Navigate, useNavigate } from 'react-router-dom';
 import { UserRole, User, AppNotification, RegistrationRequest } from '../types';
@@ -25,12 +24,12 @@ import { AdminRepManagement } from './AdminRepManagement';
 import { AdminSuppliers } from './AdminSuppliers';
 import { TradingInsights } from './TradingInsights';
 import { Contacts } from './Contacts';
+import { FarmerNetwork } from './FarmerNetwork';
 import { Notifications } from './Notifications';
 import { LiveActivity } from './LiveActivity';
 import { Inventory } from './Inventory';
 import { SharedProductLanding } from './SharedProductLanding';
 import { AdminMarketOps } from './AdminMarketOps';
-// Added missing import for EnvironmentalImpact component
 import { EnvironmentalImpact } from './EnvironmentalImpact';
 import { 
   LayoutDashboard, ShoppingCart, Users, Settings, LogOut, Tags, ChevronDown, UserPlus, 
@@ -135,13 +134,13 @@ const AppLayout = ({ children, user, onLogout }: any) => {
                 <SidebarLink to="/impact" icon={Leaf} label="Impact Dashboard" active={isActive('/impact')} />
             </div>
 
-            <div className="pt-4 mt-4 border-t border-gray-50">
+            <div className="pt-4 mt-4 border-t border-gray-100">
                 <p className="px-4 text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Leads</p>
                 <SidebarLink to="/pricing-requests" icon={Calculator} label="Pricing Audits" active={isActive('/pricing-requests')} />
                 <SidebarLink to="/negotiations" icon={Gavel} label="Negotiations" active={isActive('/negotiations')} />
             </div>
 
-            <div className="pt-4 mt-4 border-t border-gray-50">
+            <div className="pt-4 mt-4 border-t border-gray-100">
                 <p className="px-4 text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Management</p>
                 <SidebarLink to="/rep-management" icon={Briefcase} label="Rep Management" active={isActive('/rep-management')} />
                 <SidebarLink to="/suppliers" icon={Store} label="Suppliers" active={isActive('/suppliers')} />
@@ -157,14 +156,16 @@ const AppLayout = ({ children, user, onLogout }: any) => {
         </div>
       ) : user.role === UserRole.GROCERY ? (
         <div className="space-y-1">
-            <SidebarLink to="/" icon={LayoutDashboard} label="Dashboard" active={isActive('/', true)} />
-            <SidebarLink to="/grocer/marketplace" icon={TrendingDown} label="Clearance Market" active={isActive('/grocer/marketplace')} />
+            <SidebarLink to="/" icon={LayoutDashboard} label="Wholesale Hub" active={isActive('/', true)} />
+            <SidebarLink to="/grocer/marketplace" icon={TrendingDown} label="Market" active={isActive('/grocer/marketplace')} />
             <SidebarLink to="/orders" icon={ShoppingCart} label="My Orders" active={isActive('/orders')} />
             <SidebarLink to="/accounts" icon={Wallet} label="Financials" active={isActive('/accounts')} />
         </div>
       ) : isPartner ? (
         <div className="space-y-1">
             <SidebarLink to="/" icon={LayoutDashboard} label="Order Management" active={isActive('/', true)} />
+            <SidebarLink to="/farmers" icon={Sprout} label="Farmer Network" active={isActive('/farmers')} />
+            <SidebarLink to="/contacts" icon={Users} label="Buyer Network" active={isActive('/contacts')} />
             <SidebarLink to="/pricing" icon={Tags} label="Inventory & Price" active={isActive('/pricing')} />
             <SidebarLink to="/accounts" icon={DollarSign} label="Financials" active={isActive('/accounts')} />
             <SidebarLink to="/market" icon={Globe} label="Supplier Market" active={isActive('/market')} />
@@ -325,6 +326,8 @@ const App = () => {
       <Route path="/accounts" element={user ? <Accounts user={user} /> : <Navigate to="/" />} />
       <Route path="/settings" element={user ? <SettingsComponent user={user} /> : <Navigate to="/" />} />
       <Route path="/orders" element={user ? <CustomerOrders user={user} /> : <Navigate to="/" />} />
+      <Route path="/contacts" element={user ? <Contacts user={user} /> : <Navigate to="/" />} />
+      <Route path="/farmers" element={user ? <FarmerNetwork user={user} /> : <Navigate to="/" />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

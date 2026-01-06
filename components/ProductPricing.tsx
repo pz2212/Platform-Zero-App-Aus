@@ -9,7 +9,9 @@ import {
   MoreVertical, ShoppingBag, 
   Share2, PackagePlus, CheckCircle, Plus, Camera, Loader2, ChevronRight,
   Box, Hash, Printer, QrCode, Sparkles, ChevronDown, Pencil, ShoppingCart,
-  Search, HandCoins, ImagePlus, Leaf
+  Search, HandCoins, ImagePlus, Leaf, Settings, Smartphone, Store,
+  // Added missing Info icon import to fix the error on line 168
+  Info
 } from 'lucide-react';
 
 interface ProductPricingProps {
@@ -17,6 +19,177 @@ interface ProductPricingProps {
 }
 
 const UNITS: ProductUnit[] = ['KG', 'Tray', 'Bin', 'Tonne', 'loose'];
+
+const MarketplaceClearanceModal = ({ isOpen, onClose, product, user, onComplete }: { 
+    isOpen: boolean, 
+    onClose: () => void, 
+    product: Product | null,
+    user: User,
+    onComplete: () => void 
+}) => {
+    const [rate, setRate] = useState<string>('');
+    const [minOrder, setMinOrder] = useState<string>('100');
+    const [logisticsRate, setLogisticsRate] = useState<string>('0.10');
+    const [minLogisticsWeight, setMinLogisticsWeight] = useState<string>('200');
+    const [isSaving, setIsSaving] = useState(false);
+
+    useEffect(() => {
+        if (product) {
+            const discountPrice = (product.defaultPricePerKg * 0.7).toFixed(2);
+            setRate(discountPrice);
+        }
+    }, [product]);
+
+    if (!isOpen || !product) return null;
+
+    const maxPrice = (product.defaultPricePerKg * 0.7).toFixed(2);
+    const isEligible = parseFloat(rate) <= parseFloat(maxPrice);
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!isEligible) {
+            alert(`Marketplace rate must be at least 30% below standard rate (Max: $${maxPrice})`);
+            return;
+        }
+        setIsSaving(true);
+        
+        const newItem: InventoryItem = {
+            id: `inv-clr-${Date.now()}`,
+            lotNumber: mockService.generateLotId(),
+            productId: product.id,
+            ownerId: user.id,
+            quantityKg: 500, // Default for demo
+            status: 'Available',
+            harvestDate: new Date().toISOString(),
+            uploadedAt: new Date().toISOString(),
+            expiryDate: new Date(Date.now() + 86400000 * 5).toISOString(),
+            discountPricePerKg: parseFloat(rate),
+            logisticsPrice: parseFloat(logisticsRate),
+            minOrderQuantity: parseFloat(minOrder),
+            minLogisticsWeight: parseFloat(minLogisticsWeight)
+        };
+        
+        mockService.addInventoryItem(newItem);
+        await new Promise(r => setTimeout(r, 800));
+        setIsSaving(false);
+        onComplete();
+        onClose();
+    };
+
+    return (
+        <div className="fixed inset-0 z-[250] flex items-center justify-center bg-black/60 backdrop-blur-md p-4 animate-in fade-in duration-300">
+            <div className="bg-white rounded-[3.5rem] shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-200 border border-gray-100 flex flex-col">
+                <div className="p-8 border-b border-gray-100 flex justify-between items-center bg-white">
+                    <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center shadow-inner-sm">
+                            <Store size={24} strokeWidth={2.5}/>
+                        </div>
+                        <div>
+                            <h2 className="text-xl font-black text-[#0F172A] tracking-tight uppercase leading-none">Add to Marketplace</h2>
+                            <p className="text-[10px] text-emerald-500 font-black uppercase tracking-widest mt-1.5">Wholesale Clearance Protocol</p>
+                        </div>
+                    </div>
+                    <button onClick={onClose} className="text-gray-300 hover:text-gray-900 transition-colors p-2 bg-white rounded-full border border-gray-100 shadow-sm">
+                        <X size={24} strokeWidth={2.5} />
+                    </button>
+                </div>
+
+                <div className="p-8 space-y-8 flex-1 overflow-y-auto no-scrollbar">
+                    {/* Product Banner */}
+                    <div className="bg-[#043003] p-6 rounded-[1.75rem] flex items-center gap-5 relative overflow-hidden group">
+                        <div className="absolute top-0 right-0 p-4 opacity-10 transform rotate-12 scale-150 group-hover:rotate-0 transition-transform duration-700">
+                            <Sparkles size={100} className="text-white"/>
+                        </div>
+                        <div className="w-16 h-16 rounded-2xl overflow-hidden border-2 border-white/20 shadow-lg relative z-10">
+                            <img src={product.imageUrl} className="w-full h-full object-cover" alt={product.name}/>
+                        </div>
+                        <div className="relative z-10">
+                            <h3 className="text-xl font-black text-white uppercase tracking-tight leading-none">{product.name}</h3>
+                            <p className="text-[10px] text-emerald-400 font-black uppercase tracking-widest mt-2">Standard Rate: ${product.defaultPricePerKg.toFixed(2)} / KG</p>
+                        </div>
+                    </div>
+
+                    {/* Inputs */}
+                    <div className="space-y-6">
+                        <div>
+                            <div className="flex justify-between items-center mb-3 px-1">
+                                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Marketplace Rate ($)</label>
+                                <span className="bg-red-50 text-red-500 px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest border border-red-100">Min 30% Req.</span>
+                            </div>
+                            <div className="relative group">
+                                <DollarSign className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-red-500 transition-colors" size={24}/>
+                                <input 
+                                    type="number" 
+                                    step="0.01"
+                                    className={`w-full pl-16 pr-6 py-8 bg-gray-50 border-2 rounded-[2rem] font-black text-5xl tracking-tighter outline-none focus:bg-white transition-all shadow-inner-sm ${isEligible ? 'border-transparent focus:border-emerald-500 text-gray-900' : 'border-red-100 text-red-600'}`} 
+                                    value={rate} 
+                                    onChange={e => setRate(e.target.value)} 
+                                />
+                            </div>
+                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-4 ml-1">
+                                Max Price: <span className="text-emerald-600 font-black">${maxPrice}</span> for eligibility.
+                            </p>
+                        </div>
+
+                        <div>
+                            <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 ml-1">Minimum Order (KG)</label>
+                            <div className="relative group">
+                                <Box className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-indigo-500 transition-colors" size={20}/>
+                                <input 
+                                    type="number" 
+                                    className="w-full pl-12 pr-6 py-5 bg-gray-50 border border-gray-100 rounded-2xl font-black text-xl text-gray-900 outline-none focus:bg-white focus:ring-4 focus:ring-indigo-50/10 transition-all" 
+                                    value={minOrder} 
+                                    onChange={e => setMinOrder(e.target.value)} 
+                                />
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 ml-1">Logistics Rate ($/KG)</label>
+                                <input 
+                                    type="number" 
+                                    step="0.01"
+                                    className="w-full p-5 bg-gray-50 border border-gray-100 rounded-2xl font-black text-xl text-gray-900 outline-none focus:bg-white focus:ring-4 focus:ring-indigo-50/10 transition-all" 
+                                    value={logisticsRate} 
+                                    // Fixed typo: changed setLogsRate to setLogisticsRate
+                                    onChange={e => setLogisticsRate(e.target.value)} 
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 ml-1">Min Logistics Weight</label>
+                                <input 
+                                    type="number" 
+                                    className="w-full p-5 bg-gray-50 border border-gray-100 rounded-2xl font-black text-xl text-gray-900 outline-none focus:bg-white focus:ring-4 focus:ring-indigo-50/10 transition-all" 
+                                    value={minLogisticsWeight} 
+                                    onChange={e => setMinLogisticsWeight(e.target.value)} 
+                                />
+                            </div>
+                        </div>
+
+                        <div className="bg-emerald-50/50 p-6 rounded-[2rem] border border-emerald-100/50 flex items-start gap-4">
+                            <Info size={20} className="text-emerald-600 shrink-0 mt-0.5"/>
+                            <p className="text-[11px] text-emerald-800 font-medium leading-relaxed">
+                                Visible to all <span className="font-black">Grocery Store</span> and <span className="font-black">Retail</span> partners. High-volume clearance at competitive rates.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="p-8 border-t border-gray-100 bg-white flex gap-4">
+                    <button onClick={onClose} className="flex-1 py-5 bg-gray-50 text-gray-400 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-gray-100 transition-all active:scale-95">Discard</button>
+                    <button 
+                        onClick={handleSubmit}
+                        disabled={isSaving || !rate}
+                        className="flex-[2] py-5 bg-[#043003] text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-2xl hover:bg-black transition-all active:scale-[0.98] flex items-center justify-center gap-3 disabled:opacity-50"
+                    >
+                        {isSaving ? <Loader2 className="animate-spin" size={20}/> : <><Check size={20} strokeWidth={3}/> Publish Lot</>}
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
 
 const AddProductModal = ({ isOpen, onClose, onComplete }: { 
     isOpen: boolean, 
@@ -103,11 +276,11 @@ const AddProductModal = ({ isOpen, onClose, onComplete }: {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="md:col-span-2">
                             <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Produce Name</label>
-                            <input required className="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl font-bold text-gray-900 outline-none focus:bg-white focus:ring-4 focus:ring-emerald-500/5 transition-all" placeholder="e.g. Organic Roma Tomatoes" value={name} onChange={e => setName(e.target.value)}/>
+                            <input required className="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl font-bold text-gray-900 outline-none focus:ring-4 focus:ring-emerald-500/5 transition-all" placeholder="e.g. Organic Roma Tomatoes" value={name} onChange={e => setName(e.target.value)}/>
                         </div>
                         <div>
                             <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Variety</label>
-                            <input required className="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl font-bold text-gray-900 outline-none focus:bg-white focus:ring-4 focus:ring-emerald-500/5 transition-all" placeholder="e.g. Roma" value={variety} onChange={e => setVariety(e.target.value)}/>
+                            <input required className="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl font-bold text-gray-900 outline-none focus:ring-4 focus:ring-emerald-500/5 transition-all" placeholder="e.g. Roma" value={variety} onChange={e => setVariety(e.target.value)}/>
                         </div>
                         <div>
                             <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Category</label>
@@ -127,7 +300,7 @@ const AddProductModal = ({ isOpen, onClose, onComplete }: {
 
                     <button 
                         disabled={isSaving || !name || !price}
-                        className="w-full py-5 bg-[#043003] hover:bg-black text-white rounded-[1.5rem] font-black uppercase tracking-[0.2em] text-xs shadow-2xl transition-all flex items-center justify-center gap-3 disabled:opacity-50 active:scale-95"
+                        className="w-full py-5 bg-[#043003] hover:bg-black text-white rounded-[1.5rem] font-black text-sm uppercase tracking-[0.2em] shadow-2xl transition-all flex items-center justify-center gap-3 disabled:opacity-50 active:scale-95"
                     >
                         {isSaving ? <Loader2 className="animate-spin" size={24}/> : <><Sparkles size={20}/> Add to Global Catalog</>}
                     </button>
@@ -371,7 +544,7 @@ const AddInventoryModal = ({ isOpen, onClose, user, products, onComplete, initia
                         <h2 className="text-xl md:text-2xl font-black text-[#0F172A] tracking-tight uppercase">Log Arrival Batch</h2>
                         <p className="text-xs text-indigo-500 font-black uppercase tracking-[0.2em] mt-1">Audit Trail Entry • Market Inward</p>
                     </div>
-                    <button onClick={onClose} className="text-gray-300 hover:text-gray-600 transition-colors p-2 bg-white rounded-full border border-gray-100 shadow-sm">
+                    <button onClick={onClose} className="text-gray-300 hover:text-gray-900 transition-colors p-2 bg-white rounded-full border border-gray-100 shadow-sm">
                         <X size={24} strokeWidth={2.5} />
                     </button>
                 </div>
@@ -523,6 +696,7 @@ export const ProductPricing: React.FC<ProductPricingProps> = ({ user }) => {
   
   // Modals
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [clearanceProduct, setClearanceProduct] = useState<Product | null>(null);
   const [selectedProductForInventory, setSelectedProductForInventory] = useState<string | undefined>(undefined);
   const [isInventoryModalOpen, setIsInventoryModalOpen] = useState(false);
   const [isAddProductModalOpen, setIsAddProductModalOpen] = useState(false);
@@ -633,37 +807,14 @@ export const ProductPricing: React.FC<ProductPricingProps> = ({ user }) => {
                             <img src={product.imageUrl} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
                             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                             
-                            {/* ACTION BUTTON CONTAINER */}
+                            {/* ACTION BUTTON CONTAINER (Top Right) */}
                             <div className="absolute top-4 right-4 z-20">
                                 <button 
-                                    onClick={(e) => toggleActionMenu(e, product.id)}
-                                    className={`p-3 md:p-3.5 rounded-full transition-all shadow-lg active:scale-90 border backdrop-blur-md ${hasActiveMenu ? 'bg-indigo-600 border-indigo-500 text-white' : 'bg-white/90 border-white/20 text-gray-900 hover:bg-white'}`}
+                                    onClick={() => { setEditingProduct(product); }}
+                                    className={`p-3 md:p-3 rounded-full transition-all shadow-lg active:scale-90 border backdrop-blur-md bg-white/90 border-white/20 text-gray-900 hover:bg-white`}
                                 >
-                                    {hasActiveMenu ? <X size={20} strokeWidth={2.5}/> : <MoreVertical size={20} strokeWidth={2.5}/>}
+                                    <Pencil size={18}/>
                                 </button>
-                                
-                                {hasActiveMenu && (
-                                    <div ref={menuRef} className="absolute right-0 top-14 w-52 md:w-56 bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-gray-100 z-50 animate-in zoom-in-95 slide-in-from-top-2 duration-150 py-2.5 overflow-hidden">
-                                        <button 
-                                            onClick={() => { setEditingProduct(product); setActiveActionMenu(null); }}
-                                            className="w-full text-left px-5 py-3.5 hover:bg-gray-50 flex items-center gap-4 group/item transition-colors"
-                                        >
-                                            <div className="p-2 bg-indigo-50 rounded-xl text-indigo-600 group-hover/item:bg-indigo-600 group-hover/item:text-white transition-all">
-                                                <Pencil size={16}/>
-                                            </div>
-                                            <span className="font-black text-gray-900 text-xs uppercase tracking-widest">Master Pricing</span>
-                                        </button>
-                                        <button 
-                                            onClick={() => { if(stock[0]) { setShareItem(stock[0]); setActiveActionMenu(null); } else { alert("No active stock lots to share."); } }}
-                                            className="w-full text-left px-5 py-3.5 hover:bg-gray-50 flex items-center gap-4 group/item transition-colors"
-                                        >
-                                            <div className="p-2 bg-blue-50 rounded-xl text-blue-600 group-hover/item:bg-blue-600 group-hover/item:text-white transition-all">
-                                                <Share2 size={16}/>
-                                            </div>
-                                            <span className="font-black text-gray-900 text-xs uppercase tracking-widest">Send Quote Link</span>
-                                        </button>
-                                    </div>
-                                )}
                             </div>
 
                             <div className="absolute bottom-4 left-4 flex gap-2">
@@ -701,16 +852,52 @@ export const ProductPricing: React.FC<ProductPricingProps> = ({ user }) => {
                             <div className="flex gap-2">
                                 <button 
                                     onClick={() => setSaleProduct(product)}
-                                    className="flex-[2] py-4 bg-[#043003] text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-black shadow-lg shadow-emerald-100 transition-all flex items-center justify-center gap-2 active:scale-95"
+                                    className="flex-1 py-4 bg-[#043003] text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-black shadow-lg shadow-emerald-100 transition-all flex items-center justify-center gap-2 active:scale-95"
                                 >
                                     <HandCoins size={16}/> SELL
                                 </button>
-                                <button 
-                                    onClick={() => handleProductAddStock(product.id)}
-                                    className="flex-1 py-4 bg-gray-50 border border-gray-100 text-gray-400 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-100 transition-all flex items-center justify-center gap-2 active:scale-95"
-                                >
-                                    <Plus size={16}/> LOG BATCH
-                                </button>
+                                
+                                {/* GEAR SETTINGS BUTTON (From Screenshot) */}
+                                <div className="relative">
+                                    <button 
+                                        onClick={(e) => toggleActionMenu(e, product.id)}
+                                        className={`p-4 rounded-2xl transition-all shadow-lg active:scale-90 border-2 ${hasActiveMenu ? 'bg-indigo-600 border-indigo-500 text-white' : 'bg-[#5c56d6] border-indigo-400 text-white hover:bg-indigo-600'}`}
+                                    >
+                                        <Settings size={20} strokeWidth={2.5}/>
+                                    </button>
+
+                                    {hasActiveMenu && (
+                                        <div ref={menuRef} className="absolute right-0 bottom-full mb-3 w-52 md:w-56 bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-gray-100 z-50 animate-in zoom-in-95 slide-in-from-bottom-2 duration-150 py-2.5 overflow-hidden origin-bottom-right">
+                                            <button 
+                                                onClick={() => handleProductAddStock(product.id)}
+                                                className="w-full text-left px-5 py-3.5 hover:bg-gray-50 flex items-center gap-4 group/item transition-colors"
+                                            >
+                                                <div className="p-2 bg-blue-50 rounded-xl text-blue-600 group-hover/item:bg-blue-600 group-hover/item:text-white transition-all">
+                                                    <Pencil size={16}/>
+                                                </div>
+                                                <span className="font-black text-gray-900 text-xs uppercase tracking-tight">Log Batch</span>
+                                            </button>
+                                            <button 
+                                                onClick={() => { if(stock[0]) { setShareItem(stock[0]); setActiveActionMenu(null); } else { alert("No active stock lots to share."); } }}
+                                                className="w-full text-left px-5 py-3.5 hover:bg-gray-50 flex items-center gap-4 group/item transition-colors border-y border-gray-50"
+                                            >
+                                                <div className="p-2 bg-indigo-50 rounded-xl text-indigo-600 group-hover/item:bg-indigo-600 group-hover/item:text-white transition-all">
+                                                    <Smartphone size={16}/>
+                                                </div>
+                                                <span className="font-black text-gray-900 text-xs uppercase tracking-tight">Connect SMS</span>
+                                            </button>
+                                            <button 
+                                                onClick={() => { setClearanceProduct(product); setActiveActionMenu(null); }}
+                                                className="w-full text-left px-5 py-3.5 hover:bg-gray-50 flex items-center gap-4 group/item transition-colors"
+                                            >
+                                                <div className="p-2 bg-emerald-50 rounded-xl text-emerald-600 group-hover/item:bg-emerald-600 group-hover/item:text-white transition-all">
+                                                    <Store size={16}/>
+                                                </div>
+                                                <span className="font-black text-gray-900 text-xs uppercase tracking-tight">Marketplace</span>
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -723,6 +910,14 @@ export const ProductPricing: React.FC<ProductPricingProps> = ({ user }) => {
         isOpen={!!editingProduct} 
         onClose={() => setEditingProduct(null)} 
         product={editingProduct} 
+        onComplete={loadData}
+      />
+
+      <MarketplaceClearanceModal
+        isOpen={!!clearanceProduct}
+        onClose={() => setClearanceProduct(null)}
+        product={clearanceProduct}
+        user={user}
         onComplete={loadData}
       />
 

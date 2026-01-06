@@ -22,14 +22,9 @@ export const GrocerDashboard: React.FC<GrocerDashboardProps> = ({ user }) => {
         const userOrders = mockService.getOrders(user.id).filter(o => o.buyerId === user.id);
         setOrders(userOrders);
         
-        // Count items that have been unsold for X days (Backend logic remains, UI hides age)
-        const now = new Date();
-        const agedStock = mockService.getAllInventory().filter(item => {
-            const uploadedAt = new Date(item.uploadedAt);
-            const diffDays = (now.getTime() - uploadedAt.getTime()) / (1000 * 60 * 60 * 24);
-            return diffDays >= (item.discountAfterDays || 3);
-        });
-        setInventoryCount(agedStock.length);
+        // Count items that are active market lots
+        const allInv = mockService.getAllInventory().filter(item => item.status === 'Available');
+        setInventoryCount(allInv.length);
     };
     fetch();
     const interval = setInterval(fetch, 5000);
@@ -76,14 +71,14 @@ export const GrocerDashboard: React.FC<GrocerDashboardProps> = ({ user }) => {
             <div className="absolute top-0 right-0 p-8 opacity-5 transform rotate-12 scale-150 group-hover:scale-[1.7] transition-transform duration-700"><ShoppingCart size={120}/></div>
             <div className="relative z-10">
                 <p className="text-[10px] font-black text-emerald-400 uppercase tracking-[0.3em] mb-4">Market Access</p>
-                <h3 className="text-2xl font-black tracking-tight leading-none mb-2">Wholesale Inventory</h3>
+                <h3 className="text-2xl font-black tracking-tight leading-none mb-2">Market Inventory</h3>
                 <p className="text-emerald-400/80 text-xs font-medium">Direct sourcing, optimized margins.</p>
             </div>
             <button 
                 onClick={() => navigate('/grocer/marketplace')}
                 className="mt-8 w-full py-4 bg-white text-[#043003] rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] flex items-center justify-center gap-2 hover:bg-emerald-50 transition-all shadow-xl shadow-black/20"
             >
-                Enter Wholesale Market <ChevronRight size={16}/>
+                ENTER WHOLESALE MARKET <ChevronRight size={16}/>
             </button>
         </div>
       </div>

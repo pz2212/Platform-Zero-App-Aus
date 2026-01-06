@@ -127,6 +127,8 @@ export interface InventoryItem {
   lastPriceVerifiedDate?: string;
   notes?: string;
   logisticsPrice?: number;
+  minOrderQuantity?: number;
+  minLogisticsWeight?: number;
 }
 
 export interface OrderItem {
