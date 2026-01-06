@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Customer, UserRole, User, RegistrationRequest, Order, Product } from '../types';
 import { mockService } from '../services/mockDataService';
@@ -98,15 +97,15 @@ export const ConsumerOnboarding: React.FC = () => {
         ))}
       </div>
 
-      <div className="bg-gray-100/50 p-1 rounded-lg inline-flex border border-gray-200">
-        <button onClick={() => setActiveTab('customers')} className={`px-8 py-2.5 text-xs font-black uppercase tracking-widest rounded-md transition-all ${activeTab === 'customers' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>Current Customers</button>
-        <button onClick={() => setActiveTab('orders')} className={`px-8 py-2.5 text-xs font-black uppercase tracking-widest rounded-md transition-all ${activeTab === 'orders' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>Orders</button>
-        <button onClick={() => setActiveTab('waiting')} className={`px-8 py-2.5 text-xs font-black uppercase tracking-widest rounded-md transition-all flex items-center gap-2 ${activeTab === 'waiting' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>
-            Waiting {pendingRequests.length > 0 && <span className="bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full">{pendingRequests.length}</span>}
+      <div className="bg-gray-100/50 p-1.5 rounded-xl inline-flex border border-gray-200">
+        <button onClick={() => setActiveTab('customers')} className={`px-8 py-2.5 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${activeTab === 'customers' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>Current Customers</button>
+        <button onClick={() => setActiveTab('orders')} className={`px-8 py-2.5 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${activeTab === 'orders' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>Orders</button>
+        <button onClick={() => setActiveTab('waiting')} className={`px-8 py-2.5 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all flex items-center gap-2 ${activeTab === 'waiting' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>
+            Waiting {pendingRequests.length > 0 && <span className="bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full ml-1">{pendingRequests.length}</span>}
         </button>
       </div>
 
-      <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden min-h-[500px]">
+      <div className="bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden min-h-[500px]">
         {activeTab === 'customers' && (
             <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
@@ -148,25 +147,45 @@ export const ConsumerOnboarding: React.FC = () => {
         )}
 
         {activeTab === 'waiting' && (
-            <div className="p-8 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="p-10 space-y-4">
                 {pendingRequests.map(req => (
-                    <div key={req.id} className="p-6 bg-gray-50 border border-gray-200 rounded-2xl hover:border-emerald-200 transition-all flex flex-col justify-between h-full">
-                        <div className="mb-6">
-                            <div className="flex justify-between items-start mb-4">
-                                <h3 className="font-black text-gray-900 text-lg uppercase leading-tight">{req.businessName}</h3>
-                                <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-[8px] font-black uppercase">{req.requestedRole}</span>
+                    <div key={req.id} className="bg-white border border-gray-100 rounded-2xl p-8 shadow-sm hover:shadow-md transition-all animate-in slide-in-from-bottom-2 duration-300">
+                        <div className="flex justify-between items-start mb-6">
+                            <div>
+                                <h3 className="font-black text-gray-900 text-xl uppercase tracking-tighter mb-4">{req.businessName || req.name}</h3>
+                                <div className="space-y-2">
+                                    <p className="flex items-center gap-3 text-sm text-gray-500 font-medium">
+                                        <Mail size={16} className="text-gray-300"/> {req.email}
+                                    </p>
+                                    <p className="flex items-center gap-3 text-sm text-gray-500 font-medium">
+                                        <MapPin size={16} className="text-gray-300"/> {req.consumerData?.location || 'Australia'}
+                                    </p>
+                                </div>
                             </div>
-                            <div className="space-y-1.5 text-xs text-gray-500 font-medium">
-                                <p className="flex items-center gap-2"><Mail size={14}/> {req.email}</p>
-                                <p className="flex items-center gap-2"><MapPin size={14}/> {req.consumerData?.location || 'Australia'}</p>
-                            </div>
+                            <span className="bg-blue-50 text-blue-600 px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest border border-blue-100">
+                                {req.requestedRole}
+                            </span>
                         </div>
-                        <div className="flex gap-2">
-                            <button onClick={() => handleApproveRequest(req.id)} className="flex-1 py-3 bg-[#043003] text-white rounded-xl font-black text-[10px] uppercase tracking-widest shadow-md hover:bg-black transition-all">Approve</button>
-                            <button className="px-4 py-3 bg-white border border-gray-200 text-gray-400 rounded-xl hover:bg-red-50 hover:text-red-500 transition-all"><X size={18}/></button>
+                        
+                        <div className="flex gap-3 mt-8">
+                            <button 
+                                onClick={() => handleApproveRequest(req.id)} 
+                                className="flex-1 py-4 bg-[#043003] hover:bg-black text-white rounded-xl font-black text-xs uppercase tracking-[0.2em] shadow-lg transition-all flex items-center justify-center"
+                            >
+                                APPROVE
+                            </button>
+                            <button className="p-4 bg-white border border-gray-200 text-gray-400 rounded-xl hover:bg-red-50 hover:text-red-500 transition-all shadow-sm">
+                                <X size={20}/>
+                            </button>
                         </div>
                     </div>
                 ))}
+                {pendingRequests.length === 0 && (
+                    <div className="py-24 text-center opacity-30">
+                        <CheckCircle size={48} className="mx-auto text-gray-300 mb-4"/>
+                        <p className="text-sm font-black uppercase tracking-widest">No pending applications</p>
+                    </div>
+                )}
             </div>
         )}
       </div>

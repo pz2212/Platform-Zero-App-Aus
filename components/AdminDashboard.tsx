@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { InventoryItem, User, UserRole, Order, Customer, Product } from '../types';
 import { mockService } from '../services/mockDataService';
@@ -8,7 +7,7 @@ import {
   Leaf, Activity, Globe, Zap, Clock, Package, ChevronRight, X,
   Eye, Pencil, Percent, Settings, UserPlus, FileText, ChevronDown,
   UserCheck, AlertTriangle, Wallet, BarChart3, TrendingDown, Info, Loader2,
-  Filter, ArrowLeft, Receipt, ChevronUp
+  Filter, ArrowLeft, Receipt, ChevronUp, Smartphone, Link as LinkIcon
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -148,44 +147,57 @@ const ActionDropdown = ({ customer, onEditMarkup, onAssignRep }: { customer: Cus
       setIsOpen(false);
       if (label === 'Configure Markup') onEditMarkup(customer);
       if (label === 'Assign Sales Rep') onAssignRep(customer);
+      if (label === 'View Portal Access') {
+          alert(`Provisioning Portal Access link for ${customer.businessName}...`);
+      }
   };
 
   const menuItems = [
-    { label: 'View Profile', icon: Eye, color: 'text-gray-600' },
-    { label: 'Edit Pricing', icon: Pencil, color: 'text-emerald-600' },
-    { label: 'Set Pricing Tier', icon: Percent, color: 'text-purple-500' },
+    { label: 'View Operations', icon: Eye, color: 'text-indigo-600' },
+    { label: 'Edit Profile', icon: Pencil, color: 'text-emerald-600' },
+    { label: 'View Portal Access', icon: LinkIcon, color: 'text-blue-500' },
     { label: 'Configure Markup', icon: Settings, color: 'text-orange-500' },
     { label: 'Assign Sales Rep', icon: UserPlus, color: 'text-slate-500', border: true },
-    { label: 'Assign Accounts Rep', icon: FileText, color: 'text-slate-500' },
   ];
 
   return (
-    <div className="relative" ref={dropdownRef}>
+    <div className="relative flex items-center gap-3" ref={dropdownRef}>
+      {/* DISPATCH ACCESS BUTTON (From Screenshot) */}
       <button 
-        onClick={() => setIsOpen(!isOpen)}
-        className={`p-3 rounded-xl transition-all border ${isOpen ? 'bg-gray-100 border-gray-200 text-gray-900 shadow-inner' : 'bg-white border-transparent text-gray-400 hover:text-gray-900 hover:bg-gray-50'}`}
+        onClick={() => alert(`Dispatching immediate marketplace access to ${customer.businessName}`)}
+        className="hidden sm:flex items-center gap-2 bg-[#059669] text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-sm hover:bg-[#047857] transition-all active:scale-95 border border-emerald-400/20"
       >
-        <MoreVertical size={20}/>
+        <Smartphone size={14}/> Dispatch Access
       </button>
-      
-      {isOpen && (
-        <div className="absolute right-0 top-full mt-2 w-64 bg-white rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-gray-100 z-[100] py-2 animate-in zoom-in-95 duration-150 origin-top-right">
-          {menuItems.map((item, idx) => (
-            <React.Fragment key={item.label}>
-              {item.border && <div className="h-px bg-gray-50 my-2 mx-4" />}
-              <button 
-                onClick={() => handleAction(item.label)}
-                className="w-full flex items-center gap-4 px-5 py-3.5 hover:bg-gray-50 transition-colors group"
-              >
-                <div className={`${item.color} transition-transform group-hover:scale-110`}>
-                    <item.icon size={18} />
-                </div>
-                <span className="text-sm font-bold text-gray-700 tracking-tight">{item.label}</span>
-              </button>
-            </React.Fragment>
-          ))}
-        </div>
-      )}
+
+      {/* THREE DOT MENU BUTTON (Modified to match blue/circular screenshot style) */}
+      <div className="relative">
+          <button 
+            onClick={() => setIsOpen(!isOpen)}
+            className={`p-2.5 rounded-xl transition-all border-2 flex items-center justify-center ${isOpen ? 'bg-indigo-50 border-indigo-600 text-indigo-600' : 'bg-white border-indigo-100 text-indigo-600 hover:border-indigo-600 shadow-sm'}`}
+          >
+            <MoreVertical size={22} strokeWidth={2.5}/>
+          </button>
+          
+          {isOpen && (
+            <div className="absolute right-0 top-full mt-3 w-64 bg-white rounded-[1.75rem] shadow-[0_30px_60px_rgba(0,0,0,0.15)] border border-gray-100 z-[100] py-3 animate-in zoom-in-95 duration-150 origin-top-right">
+              {menuItems.map((item, idx) => (
+                <React.Fragment key={item.label}>
+                  {item.border && <div className="h-px bg-gray-50 my-2 mx-4" />}
+                  <button 
+                    onClick={() => handleAction(item.label)}
+                    className="w-full flex items-center gap-4 px-6 py-4 hover:bg-gray-50 transition-colors group"
+                  >
+                    <div className={`${item.color} transition-transform group-hover:scale-110`}>
+                        <item.icon size={20} />
+                    </div>
+                    <span className="text-[13px] font-black text-gray-700 tracking-tight uppercase">{item.label}</span>
+                  </button>
+                </React.Fragment>
+              ))}
+            </div>
+          )}
+      </div>
     </div>
   );
 };
@@ -634,7 +646,7 @@ export const AdminDashboard: React.FC = () => {
                         <th className="px-8 py-8 text-right">Lifetime Value</th>
                         <th className="px-8 py-8 text-right text-emerald-600">Total Profit</th>
                         <th className="px-8 py-8">Assigned Rep</th>
-                        <th className="px-8 py-8 text-right">Action</th>
+                        <th className="px-8 py-8 text-right px-10">Action</th>
                     </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-50">
@@ -718,7 +730,7 @@ export const AdminDashboard: React.FC = () => {
                                         </div>
                                     </button>
                                 </td>
-                                <td className="px-8 py-7 text-right">
+                                <td className="px-8 py-7 text-right px-10">
                                     <ActionDropdown 
                                         customer={customer} 
                                         onEditMarkup={setEditingMarkupCustomer} 
@@ -750,3 +762,7 @@ export const AdminDashboard: React.FC = () => {
     </div>
   );
 };
+
+const Info = ({ size = 24, ...props }: any) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" {...props}><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+);

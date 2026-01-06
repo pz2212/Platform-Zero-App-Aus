@@ -10,7 +10,9 @@ import {
   Users, Clock, CheckCircle, X, Mail, Smartphone, Building,
   Settings, Calculator, FileText, ChevronRight, LayoutGrid, Search, Bell, History, Calendar, Printer, AlertTriangle, TrendingUp, Globe, Star, UserPlus, ArrowUpRight,
   Plus, Store, MessageSquare, Camera, Image as ImageIcon, Loader2, Send, ChevronDown, DollarSign,
-  Boxes, ClipboardCheck, UserCheck, Timer, ArrowRight, ShoppingCart, Check, Zap, HandCoins, Target, MessageCircle, Sparkles
+  Boxes, ClipboardCheck, UserCheck, Timer, ArrowRight, ShoppingCart, Check, Zap, HandCoins, Target, MessageCircle, Sparkles,
+  // Added missing Gavel import from lucide-react
+  Gavel
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -168,7 +170,7 @@ const OrderFulfillmentModal = ({ isOpen, onClose, order, products, customers, on
                                         <option value="Route Hub">External: PZ Hub</option>
                                     </select>
                                     {order.status === 'Ready for Delivery' && (
-                                        <button onClick={handleDispatch} disabled={!selectedDriver} className="w-full py-4 bg-emerald-600 text-white rounded-xl font-black uppercase text-[10px] tracking-widest flex items-center justify-center gap-2">Confirm Dispatch</button>
+                                        <button onClick={handleDispatch} disabled={!selectedDriver} className="w-full py-4 bg-emerald-600 text-white rounded-xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2">Confirm Dispatch</button>
                                     )}
                                 </div>
                             </div>
@@ -259,30 +261,30 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
             {/* LEFT SIDE: ORDER FULFILLMENT PIPELINE (8 Columns) */}
             <div className="xl:col-span-8 space-y-8 animate-in slide-in-from-left-4 duration-700">
                 
-                {/* URGENT PRICE AUDIT REQUESTS (Requested Enhancement) */}
+                {/* URGENT PRICE AUDIT REQUESTS (Refined Styling) */}
                 {pendingPriceRequests.length > 0 && (
-                    <div className="bg-[#FFF1F2] border-4 border-red-500 rounded-[3rem] p-8 md:p-10 shadow-2xl relative overflow-hidden animate-in slide-in-from-top-10 duration-700">
-                        <div className="absolute top-0 right-0 p-8 opacity-5 transform rotate-12 scale-150"><Calculator size={200} /></div>
-                        <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-10">
-                            <div className="flex items-center gap-6">
-                                <div className="w-20 h-20 bg-red-500 rounded-[2rem] flex items-center justify-center text-white shadow-xl shadow-red-500/30 border-4 border-white animate-pulse">
-                                    <Calculator size={40} />
+                    <div className="bg-[#FFF1F2] border-4 border-[#F43F5E] rounded-[3.5rem] p-8 md:p-12 shadow-2xl relative overflow-hidden animate-in slide-in-from-top-10 duration-700">
+                        <div className="absolute top-0 right-0 p-8 opacity-10 transform rotate-12 scale-150 pointer-events-none"><Calculator size={240} className="text-[#F43F5E]"/></div>
+                        <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-10">
+                            <div className="flex items-center gap-8">
+                                <div className="w-24 h-24 bg-[#F43F5E] rounded-[2.5rem] flex items-center justify-center text-white shadow-xl shadow-red-500/30 border-4 border-white animate-pulse shrink-0">
+                                    <Gavel size={48} />
                                 </div>
-                                <div>
-                                    <div className="flex items-center gap-2 mb-2">
-                                        <h2 className="text-2xl font-black text-red-900 uppercase tracking-tighter leading-none">Urgent Action Required</h2>
-                                        <span className="bg-red-900 text-white px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-[0.2em]">Live Lead</span>
+                                <div className="text-center lg:text-left">
+                                    <div className="flex items-center justify-center lg:justify-start gap-3 mb-3">
+                                        <h2 className="text-3xl font-black text-[#9F1239] uppercase tracking-tighter leading-none">Urgent Price Audit</h2>
+                                        <span className="bg-[#9F1239] text-white px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] shadow-sm">Live Lead</span>
                                     </div>
-                                    <p className="text-red-700 text-sm font-bold leading-relaxed max-w-lg">
-                                        Platform Zero HQ has assigned <span className="font-black underline">{pendingPriceRequests.length} pending price audits</span> to your entity. Submit your best wholesale rates now to win these new buyers.
+                                    <p className="text-[#E11D48] text-[15px] font-bold leading-relaxed max-w-xl">
+                                        Platform Zero HQ has assigned <span className="text-[#9F1239] font-black underline underline-offset-4">{pendingPriceRequests.length} pending lead assignments</span> to your account. Match the target floors to secure immediate trade activation.
                                     </p>
                                 </div>
                             </div>
                             <button 
                                 onClick={() => setSelectedPriceRequest(pendingPriceRequests[0])}
-                                className="w-full md:w-auto px-14 py-6 bg-red-600 hover:bg-black text-white rounded-3xl font-black uppercase tracking-[0.25em] text-xs shadow-2xl shadow-red-900/40 transition-all active:scale-95 flex items-center justify-center gap-3 group"
+                                className="w-full lg:w-auto px-16 py-7 bg-[#0F172A] hover:bg-black text-white rounded-[1.75rem] font-black uppercase tracking-[0.25em] text-xs shadow-2xl shadow-[#0F172A]/20 transition-all active:scale-95 flex items-center justify-center gap-4 group shrink-0"
                             >
-                                Open Price Audit <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+                                Open Price Audit <ArrowRight size={22} className="group-hover:translate-x-1 transition-transform" />
                             </button>
                         </div>
                     </div>
@@ -468,7 +470,3 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
     </div>
   );
 };
-
-const ArrowLeft = ({ size = 24, ...props }: any) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
-);

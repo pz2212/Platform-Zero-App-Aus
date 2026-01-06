@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SupplierPriceRequest, User, Customer } from '../types';
@@ -6,8 +5,8 @@ import { mockService } from '../services/mockDataService';
 import { 
   Handshake, Store, CheckCircle, ChevronRight, X, MessageSquare, 
   Clock, AlertCircle, Rocket, MapPin, DollarSign, ArrowLeft, Percent, TrendingUp, Check,
-  // Add BrainCircuit and Package to the imports
-  Search, Filter, Info, Gavel, FileSearch, ArrowUpRight, BrainCircuit, Package
+  Search, Filter, Info, Gavel, FileSearch, ArrowUpRight, BrainCircuit, Package,
+  ArrowRight
 } from 'lucide-react';
 import { ChatDialog } from './ChatDialog';
 
@@ -80,11 +79,11 @@ export const AdminPriceRequests: React.FC = () => {
       <div className="flex justify-between items-end px-2">
         <div>
           <h1 className="text-4xl font-black text-gray-900 tracking-tighter uppercase leading-none">Market Negotiations</h1>
-          <p className="text-gray-500 font-bold mt-2 uppercase text-[10px] tracking-widest">Pricing Audits & Partner Matching</p>
+          <p className="text-gray-400 font-black mt-2 uppercase text-[10px] tracking-[0.3em]">Pricing Audits & Partner Matching</p>
         </div>
         <button 
             onClick={() => navigate('/pricing-requests')}
-            className="px-8 py-4 bg-[#043003] text-white rounded-[1.25rem] font-black text-[11px] uppercase tracking-[0.2em] shadow-xl hover:bg-black transition-all active:scale-95"
+            className="px-10 py-4 bg-[#043003] text-white rounded-2xl font-black text-[11px] uppercase tracking-[0.2em] shadow-xl hover:bg-black transition-all active:scale-95"
         >
             + Initiate Price Audit
         </button>
@@ -111,26 +110,26 @@ export const AdminPriceRequests: React.FC = () => {
         </div>
       )}
 
-      {/* Sub-Category Navigation */}
-      <div className="bg-gray-100/50 p-2 rounded-[2.25rem] inline-flex border border-gray-200 shadow-inner-sm mx-2">
+      {/* TABS (Matches Screenshot) */}
+      <div className="bg-gray-100/50 p-1.5 rounded-[2rem] inline-flex border border-gray-200 shadow-inner-sm mx-2">
         <button 
             onClick={() => setActiveTab('REVIEW')}
-            className={`px-12 py-5 rounded-[1.75rem] text-xs font-black uppercase tracking-[0.2em] transition-all flex items-center gap-3 ${activeTab === 'REVIEW' ? 'bg-white text-indigo-700 shadow-xl ring-1 ring-black/5' : 'text-gray-400 hover:text-gray-600'}`}
+            className={`px-10 py-4 rounded-[1.5rem] text-[10px] font-black uppercase tracking-[0.2em] transition-all flex items-center gap-3 ${activeTab === 'REVIEW' ? 'bg-white text-indigo-700 shadow-lg ring-1 ring-black/5' : 'text-gray-400 hover:text-gray-600'}`}
         >
-            <Gavel size={18}/> Negotiations {reviewNegotiations.length > 0 && <span className="bg-indigo-600 text-white w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-black animate-in zoom-in">{reviewNegotiations.length}</span>}
+            <Gavel size={16}/> Negotiations {reviewNegotiations.length > 0 && <span className="bg-indigo-600 text-white w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-black">{reviewNegotiations.length}</span>}
         </button>
         <button 
             onClick={() => setActiveTab('PIPELINE')}
-            className={`px-12 py-5 rounded-[1.75rem] text-xs font-black uppercase tracking-[0.2em] transition-all flex items-center gap-3 ${activeTab === 'PIPELINE' ? 'bg-white text-gray-900 shadow-xl ring-1 ring-black/5' : 'text-gray-400 hover:text-gray-600'}`}
+            className={`px-10 py-4 rounded-[1.5rem] text-[10px] font-black uppercase tracking-[0.2em] transition-all flex items-center gap-3 ${activeTab === 'PIPELINE' ? 'bg-white text-gray-900 shadow-lg ring-1 ring-black/5' : 'text-gray-400 hover:text-gray-600'}`}
         >
-            <Clock size={18}/> Pending Leads {pipelineItems.length > 0 && <span className="bg-orange-500 text-white w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-black animate-in zoom-in">{pipelineItems.length}</span>}
+            <Clock size={16}/> Pending Leads {pipelineItems.length > 0 && <span className="bg-orange-500 text-white w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-black">{pipelineItems.length}</span>}
         </button>
       </div>
 
-      <div className="bg-white rounded-[3rem] shadow-sm border border-gray-100 overflow-hidden min-h-[600px] relative">
-        <div className="p-10 border-b border-gray-100 bg-gray-50/50 flex flex-col sm:flex-row justify-between items-center gap-8">
+      <div className="bg-white rounded-[3.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.02)] border border-gray-100 overflow-hidden min-h-[600px] relative mx-2">
+        <div className="p-8 md:p-10 border-b border-gray-100 bg-white flex flex-col md:flex-row justify-between items-center gap-8">
             <div className="flex items-center gap-5">
-                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg text-white ${activeTab === 'PIPELINE' ? 'bg-orange-500' : 'bg-indigo-600'}`}>
+                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg text-white ${activeTab === 'PIPELINE' ? 'bg-orange-500 shadow-orange-500/20' : 'bg-indigo-600 shadow-indigo-600/20'}`}>
                     {activeTab === 'PIPELINE' ? <Clock size={28}/> : <Handshake size={28}/>}
                 </div>
                 <div>
@@ -138,14 +137,14 @@ export const AdminPriceRequests: React.FC = () => {
                       {activeTab === 'PIPELINE' ? 'Awaiting Supplier Response' : 'Review Incoming Quotes'}
                   </h3>
                   <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1.5 flex items-center gap-2">
-                    <AlertCircle size={12}/> Verified wholesale leads in negotiation phase
+                    <CheckCircle size={12} className="text-indigo-500"/> Verified wholesale leads in negotiation phase
                   </p>
                 </div>
             </div>
-            <div className="flex items-center gap-3">
-                <div className="relative group hidden lg:block">
+            <div className="flex items-center gap-3 w-full md:w-auto">
+                <div className="relative group flex-1 md:w-64">
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300" size={18}/>
-                    <input placeholder="Filter by lead..." className="pl-11 pr-6 py-3.5 bg-white border border-gray-200 rounded-2xl text-[11px] font-black uppercase tracking-widest outline-none focus:ring-4 focus:ring-indigo-50/10 shadow-sm"/>
+                    <input placeholder="Filter by lead..." className="w-full pl-11 pr-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl text-[10px] font-black uppercase tracking-widest outline-none focus:ring-4 focus:ring-indigo-500/5 focus:bg-white transition-all"/>
                 </div>
                 <button className="p-4 bg-white border border-gray-200 rounded-2xl text-gray-400 hover:text-indigo-600 shadow-sm transition-all"><Filter size={20}/></button>
             </div>
@@ -160,7 +159,7 @@ export const AdminPriceRequests: React.FC = () => {
                 <p className="text-sm text-gray-400 font-bold uppercase tracking-[0.2em] mt-3">No active items in {activeTab.toLowerCase()} status</p>
             </div>
         ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 p-10 gap-10">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 p-8 md:p-10 gap-10">
                 {displayedRequests.map(req => {
                     const supplier = wholesalers.find(w => w.id === req.supplierId);
                     const isNegotiated = req.status === 'SUBMITTED';
@@ -169,41 +168,47 @@ export const AdminPriceRequests: React.FC = () => {
                         <div 
                             key={req.id} 
                             onClick={() => setViewingRequest(req)}
-                            className={`border-4 rounded-[3rem] p-10 hover:shadow-[0_40px_80px_-20px_rgba(0,0,0,0.1)] transition-all cursor-pointer group relative overflow-hidden flex flex-col justify-between h-[420px] bg-white ${isNegotiated ? 'border-indigo-100 hover:border-indigo-400' : 'border-gray-50 hover:border-orange-200'} animate-in zoom-in-95 duration-300`}
+                            className={`group relative flex flex-col justify-between h-[420px] rounded-[3rem] border-4 transition-all duration-500 cursor-pointer overflow-hidden bg-white shadow-sm hover:shadow-2xl ${isNegotiated ? 'border-indigo-600/40 hover:border-indigo-600' : 'border-gray-50 hover:border-orange-200'}`}
                         >
+                            {/* ACTION ITEM BADGE (Matches Screenshot) */}
                             {isNegotiated && (
-                                <div className="absolute top-0 right-0 bg-indigo-600 text-white px-8 py-3 text-[10px] font-black uppercase tracking-[0.2em] rounded-bl-[2rem] shadow-xl animate-in slide-in-from-right-4">
+                                <div className="absolute top-0 right-0 bg-[#5c56d6] text-white px-10 py-3.5 text-[10px] font-black uppercase tracking-[0.3em] rounded-bl-[2.5rem] shadow-xl z-20">
                                     Action Item
                                 </div>
                             )}
 
-                            <div>
+                            <div className="p-10">
                                 <div className="flex justify-between items-start mb-10">
-                                    <span className={`px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] border-2 shadow-inner-sm ${getStatusColor(req.status)}`}>
-                                        {req.status === 'SUBMITTED' ? 'Review Quote' : 'Sent to Partner'}
-                                    </span>
-                                    <p className="text-[10px] text-gray-300 font-black font-mono mt-2 tracking-widest">AUDIT_ID: {req.id.split('-').pop()}</p>
+                                    <button className="bg-indigo-50 text-indigo-600 px-6 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest border border-indigo-100 shadow-inner-sm hover:bg-indigo-100 transition-colors">
+                                        Review Quote
+                                    </button>
+                                    <p className="text-[9px] text-gray-300 font-black font-mono mt-2 tracking-widest uppercase">AUDIT_ID: {req.id.split('-').pop()}</p>
                                 </div>
-                                <h4 className="font-black text-gray-900 text-3xl leading-none mb-4 tracking-tighter uppercase group-hover:text-indigo-600 transition-colors">{req.customerContext}</h4>
+
+                                <h4 className="font-black text-gray-900 text-3xl leading-none mb-8 tracking-tighter uppercase group-hover:text-indigo-600 transition-colors">{req.customerContext}</h4>
+                                
                                 <div className="space-y-4">
-                                    <div className="flex items-center gap-4 p-4 bg-gray-50/80 rounded-[1.5rem] border border-gray-100 group-hover:bg-white group-hover:border-indigo-100 transition-all">
-                                        <Store size={20} className="text-indigo-400 shrink-0"/>
-                                        <p className="text-sm font-black text-gray-900 uppercase truncate">{supplier?.businessName}</p>
+                                    <div className="flex items-center gap-4 p-5 bg-white border border-gray-100 rounded-[1.75rem] shadow-sm group-hover:border-indigo-200 transition-all">
+                                        <div className="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-600 shrink-0">
+                                            <Store size={20}/>
+                                        </div>
+                                        <p className="text-sm font-black text-gray-900 uppercase truncate leading-none">{supplier?.businessName}</p>
                                     </div>
-                                    <div className="flex items-center gap-4 px-4">
+                                    <div className="flex items-center gap-4 px-6">
                                         <MapPin size={18} className="text-gray-300 shrink-0"/>
                                         <p className="text-[11px] text-gray-400 font-bold uppercase tracking-widest">{req.customerLocation}</p>
                                     </div>
                                 </div>
                             </div>
                             
-                            <div className="flex items-center justify-between pt-10 border-t border-gray-50 group-hover:border-indigo-50">
-                                <div className={`flex items-center gap-2.5 font-black text-[10px] uppercase tracking-widest ${isNegotiated ? 'text-indigo-600' : 'text-gray-400'}`}>
+                            {/* FOOTER (Matches Screenshot) */}
+                            <div className="p-8 border-t border-gray-50 flex items-center justify-between group-hover:bg-indigo-50/20 transition-colors">
+                                <div className={`flex items-center gap-2.5 font-black text-[10px] uppercase tracking-[0.25em] ${isNegotiated ? 'text-indigo-600' : 'text-gray-300'}`}>
                                     {isNegotiated ? <CheckCircle size={18}/> : <Clock size={18}/>}
                                     {isNegotiated ? 'Response Locked' : 'Sourcing in Progress'}
                                 </div>
-                                <div className="bg-gray-100 p-3 rounded-2xl group-hover:bg-indigo-600 group-hover:text-white transition-all transform group-hover:scale-110">
-                                    <ChevronRight size={22} strokeWidth={3}/>
+                                <div className={`p-4 rounded-2xl transition-all shadow-lg flex items-center justify-center ${isNegotiated ? 'bg-[#5c56d6] text-white group-hover:scale-110' : 'bg-gray-100 text-gray-400'}`}>
+                                    <ChevronRight size={24} strokeWidth={3}/>
                                 </div>
                             </div>
                         </div>
@@ -237,7 +242,6 @@ export const AdminPriceRequests: React.FC = () => {
                   
                   <div className="p-12 overflow-y-auto flex-1 custom-scrollbar bg-white">
                       <div className="bg-[#EEF2FF] rounded-[2rem] p-8 border border-indigo-100 mb-12 flex items-start gap-6 relative overflow-hidden group">
-                        {/* Fix: Added missing BrainCircuit import to lucide-react imports */}
                         <div className="absolute top-0 right-0 p-6 opacity-5 transform rotate-45 scale-150 group-hover:rotate-0 transition-transform duration-1000"><BrainCircuit size={140}/></div>
                         <div className="bg-white p-4 rounded-2xl shadow-xl border border-indigo-50 text-indigo-600 shrink-0 relative z-10">
                             <Info size={32} strokeWidth={2.5} />
@@ -267,7 +271,6 @@ export const AdminPriceRequests: React.FC = () => {
                                           <td className="py-10 px-10">
                                             <div className="font-black text-gray-900 text-2xl tracking-tighter uppercase leading-none mb-2 group-hover:text-indigo-600 transition-colors">{item.productName}</div>
                                             <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest flex items-center gap-2">
-                                                {/* Fix: Added missing Package import to lucide-react imports */}
                                                 <Package size={14}/> Weekly Consumption: {item.qty} units
                                             </div>
                                           </td>
